@@ -200,7 +200,7 @@ def extract():
 		FROM batterylog l \
 		LEFT JOIN battery b on b.id=l.batteryid \
 		LEFT JOIN model m on m.id=l.modelid \
-		WHERE l.used * 4 > l.capacity ORDER by date"
+		WHERE l.used * 4 > l.capacity"
 	if batteryid != None:
 		sql += " AND l.batteryid=" + str(batteryid)
 	if modelid != None:
@@ -209,6 +209,8 @@ def extract():
 		sql += " AND l.date >= '" + str(start) + "'"
 	if end != None:
 		sql += " AND l.date < '" + str(end) + "'"
+	
+	sql += " ORDER BY date"
 
 	header  = "+-------+---------------------+---------------------+---------------------+----------+----------+-------------+-------+-------+-------+"
 	header2 = "+-------------------------------------------------------------------------------------------------------------------------------------+"
