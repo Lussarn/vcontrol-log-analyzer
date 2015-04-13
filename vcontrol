@@ -1,5 +1,8 @@
 #!/usr/bin/python
 
+# Vcontrol log analyzer by Linus Larsson (linus.larsson@gmail.com)
+# 
+
 import sys
 import inspect
 import os
@@ -194,7 +197,7 @@ def extract():
 		FROM batterylog l \
 		LEFT JOIN battery b on b.id=l.batteryid \
 		LEFT JOIN model m on m.id=l.modelid \
-		WHERE l.used * 4 > l.capacity"
+		WHERE l.used * 4 > l.capacity ORDER by date"
 	if batteryid != None:
 		sql += " AND l.batteryid=" + str(batteryid)
 	if modelid != None:
