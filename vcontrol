@@ -22,6 +22,7 @@ def db():
 	if db.conn == None:
 		db.conn = sqlite3.connect(os.path.join(os.path.expanduser("~"), '.vcontrol.db'))
 
+
 	# Create tables if necesarry
 	cur = db.conn.cursor()
 	cur.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='battery'")
@@ -29,7 +30,7 @@ def db():
 	if rs == None:
 		print "Creating database table battery";
 		cur = db.conn.cursor()
-		cur.execute("CREATE TABLE battery (id INTEGER PRIMARY KEY autoincrement NOT NULL, name varchar(255))")
+		cur.execute("CREATE TABLE battery (id INTEGER PRIMARY KEY autoincrement NOT NULL, name TEXT)")
 		db.conn.commit();
 
 	cur = db.conn.cursor()
@@ -38,7 +39,7 @@ def db():
 	if rs == None:
 		print "Creating database table model";
 		cur = db.conn.cursor()
-		cur.execute("CREATE TABLE model (id INTEGER PRIMARY KEY autoincrement NOT NULL, name varchar(255))")
+		cur.execute("CREATE TABLE model (id INTEGER PRIMARY KEY autoincrement NOT NULL, name TEXT)")
 		db.conn.commit();
 
 	cur = db.conn.cursor()
@@ -125,17 +126,18 @@ def import_data():
 
 	batteryDirs = [ os.path.join(batteryPath,f) for f in os.listdir(batteryPath) if os.path.isdir(os.path.join(batteryPath,f)) and os.path.exists(os.path.join(batteryPath, f, 'name')) ]
 	for d in batteryDirs:
-		name = open(os.path.join(d, 'name')).read(255).strip()
+		name = open(os.path.join(d, 'name')).read(255).strip().strip("\x00")
+		print name
 		batteryid = get_battery_id(name)
 		with open(os.path.join(d, 'log.csv')) as f:
 			lines = f.readlines()
-		lines = [x.strip('\n') for x in lines] 	
+		lines = [x.strip() for x in lines] 	
 
 		for line in lines:
 			cols = line.split(';')
 
 			date = cols.pop(0)
-			date = time.strftime('%Y-%m-%d %H:%M:%S', time.strptime(date,'%Y-%m-%d %H:%M:%S'))
+			date = time.strftime('%Y-%m-%d %H:%M:%S', time.strptime(date,'%d.%m.%Y %H:%M:%S'))
 			capacity = cols.pop(0)
 			used = cols.pop(0)
 			duration = cols.pop(0)
@@ -219,14 +221,14 @@ def extract():
 	capacityused = 0;
 	flighttime = 0
 	for row in cur.execute(sql):
+
 		capacityused += row[6];
 		cycles += 1
 		duration = "{0:02d}:{1:02d}".format(int(row[4] / 60), int(row[4] % 60))
 		flighttime += row[4]
 		used = str(row[6]) + ' (' + str(int(float(row[6]) / row[5] * 100)) + '%)'
-
-		row = "| {:<6}| {:<20}| {:<20}| {:<20}| {:<9}| {:<9}| {:<12}| {:<6}| {:<6}| {:<6}|".format(row[0],row[3],row[1],row[2], duration,row[5],used, row[7], row[8], row[9])
-		print row
+		battery = "#" + row[1] + "#";
+		print "| {0:<6}| {1:<20}| {2:<20}| {3:<20}| {4:<9}| {5:<9}| {6:<12}| {7:<6}| {8:<6}| {9:<6}|".format(row[0],row[3],row[1],row[2], duration,row[5],used, row[7], row[8], row[9])
 
 	capacityused = round(float(capacityused) / 1000, 2)
 	t = "{0:02d}:{1:02d}:{2:02d}".format(int(flighttime / 3600), int((flighttime % 3600) / 60), int(flighttime % 60))
