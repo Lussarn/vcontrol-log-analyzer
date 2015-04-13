@@ -127,7 +127,6 @@ def import_data():
 	batteryDirs = [ os.path.join(batteryPath,f) for f in os.listdir(batteryPath) if os.path.isdir(os.path.join(batteryPath,f)) and os.path.exists(os.path.join(batteryPath, f, 'name')) ]
 	for d in batteryDirs:
 		name = open(os.path.join(d, 'name')).read(255).strip().strip("\x00")
-		print name
 		batteryid = get_battery_id(name)
 		with open(os.path.join(d, 'log.csv')) as f:
 			lines = f.readlines()
