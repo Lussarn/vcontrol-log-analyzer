@@ -10,9 +10,10 @@ import time
 import sqlite3
 
 def usage():
+	print "vcontrol --help                                     This help"
 	print "vcontrol --import [PATH_TO_VCONTROL]                import data from vbar control"
 	print "vcontrol --list                                     List batteries and models"
-	print "vcontrol --extract [model=id]                       Export data" 
+	print "vcontrol --extract [model=id]                       Extract data" 
 	print "                   [battery=id]" 
 	print "                   [start=YYYY-MM-DD]"
 	print "                   [end=YYYY-MM-DD]"
@@ -250,8 +251,9 @@ def main():
 		list_gear()
 	elif command == '--extract':
 		extract()
+	elif command == '--help':
+		usage()
 	else:
 		usage()
-		exit(1)
 
 main()
