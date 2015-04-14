@@ -168,19 +168,19 @@ def extract():
 
 		if ar[0] == 'battery':
 			if len(ar) != 2:
-				print "Unkown battery"
+				print "Unknown battery"
 				exit(1);
 			batteryid = int(ar[1])
 
 		elif ar[0] == 'model':
 			if len(ar) != 2:
-				print "Unkown model"
+				print "Unknown model"
 				exit(1);
 			modelid = int(ar[1])
 
 		elif ar[0] == 'start':
 			if len(ar) != 2:
-				print "Unkown start"
+				print "Unknown start"
 				exit(1);
 			start = ar[1]
 
@@ -191,7 +191,7 @@ def extract():
 			end = ar[1]
 
 		else:
-			print "Unkown extract parameter:",ar[0]
+			print "Unknown extract parameter:",ar[0]
 			exit(1);
 
 	sql = "\
