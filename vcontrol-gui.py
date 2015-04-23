@@ -99,11 +99,11 @@ class MainWindow(wx.Frame):
 		sizerStatus = wx.BoxSizer(wx.VERTICAL)
 		panelStatus.SetSizer(sizerStatus)
 		sizerStretch.Add(panelStatus, 1, wx.ALIGN_RIGHT | wx.LEFT | wx.RIGHT | wx.TOP | wx.BOTTOM, 5)
-		sizerStatus.Add(wx.StaticText(panelStatus, label='Connection status'), 0, wx.ALIGN_LEFT | wx.LEFT | wx.RIGHT | wx.TOP, 5)
-		self.bitmap_connection_off = wx.Bitmap('assets/img/ball-red.png', wx.BITMAP_TYPE_ANY)
-		self.bitmap_connection_on = wx.Bitmap('assets/img/ball-green.png', wx.BITMAP_TYPE_ANY)
-		self.connection_img = wx.StaticBitmap(panelStatus, bitmap=self.bitmap_connection_off)
-		sizerStatus.Add(self.connection_img, 1,  wx.CENTER | wx.TOP)
+		sizerStatus.Add(wx.StaticText(panelStatus, label='Connection status'), 0, wx.ALIGN_LEFT | wx.LEFT | wx.RIGHT | wx.TOP | wx.BOTTOM, 5)
+		bitmap = wx.Bitmap('assets/img/ball-red.png', wx.BITMAP_TYPE_ANY)
+		self.connection_img = wx.StaticBitmap(panelStatus, bitmap=bitmap)
+		sizerStatus.Add(self.connection_img, 0, wx.CENTER)
+
 
 		# Grid
 		self.grid = wx.grid.Grid(self)
@@ -140,6 +140,15 @@ class MainWindow(wx.Frame):
 		self.SetSizer(sizerMainVert)
 		sizerMainVert.Fit(self)
 		self.SetSize(wx.Size(-1, 600))
+
+		print "init timer"
+		TIMER_ID = 100  # pick a number
+		self.timer = wx.Timer(self, TIMER_ID)  # message will be sent to the panel
+		self.timer.Start(1000)  # x100 milliseconds
+		wx.EVT_TIMER(self, TIMER_ID, self.on_timer)  # call the on_timer function
+
+		self._vcontrol_connected = False
+
 		self.Show()
 
 	def OnDateChanged(self, event):
@@ -237,6 +246,20 @@ class MainWindow(wx.Frame):
 
 		self.SetStatusText('Cycles: ' + str(data['totals']['cycles']) + '   Used capacity: ' + str(data['totals']['used']) + "Ah   Duration: " +str(data['totals']['duration']))
 
+	def on_timer(self, event):
+		if self.analyzer.vcontrol_is_connected():
+			if self._vcontrol_connected == True:
+				return
+			self._vcontrol_connected = True
+			bitmap = wx.Bitmap('assets/img/ball-green.png', wx.BITMAP_TYPE_ANY)
+			self.connection_img.SetBitmap(bitmap)
+		else:
+			if self._vcontrol_connected == False:
+				return
+			self._vcontrol_connected = False
+			bitmap = wx.Bitmap('assets/img/ball-red.png', wx.BITMAP_TYPE_ANY)
+			self.connection_img.SetBitmap(bitmap)
+
 	def _pydate2wxdate(self, date):
 		tt = date.timetuple()
 		dmy = (tt[2], tt[1]-1, tt[0])
@@ -253,6 +276,8 @@ class MainWindow(wx.Frame):
 app = wx.App(False)
 app.SetAppName("VBar control log analyzer")
 app.SetMacHelpMenuTitleName("VControl")
+
+
 
 frame = MainWindow()
 frame.Show(True)

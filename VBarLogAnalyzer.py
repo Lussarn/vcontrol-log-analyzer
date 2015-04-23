@@ -205,7 +205,7 @@ class Analyzer:
 
 	def get_date_interval(self):
 		cur = self._db().cursor()
-		cur.execute("SELECT MIN(date) AS mindate, MAX(date) AS maxdate FROM batterylog WHERE used * 4 > capacity")
+		cur.execute("SELECT MIN(date) AS mindate, MAX(date(date, '+1 day')) AS maxdate FROM batterylog WHERE used * 4 > capacity")
 		rs = cur.fetchone()
 		if rs == None:
 			return { 'first': datetime.datetime(2000,1,1), 'last': datetime.datetime(2030,1,1) }
