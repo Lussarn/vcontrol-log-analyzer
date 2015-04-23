@@ -20,11 +20,11 @@ class MainWindow(wx.Frame):
 		self.CreateStatusBar()
 
 		# Toolbar
-		toolbar = self.CreateToolBar(wx.TB_TEXT)
-		toolbar.AddLabelTool(1, 'Import', wx.Bitmap('assets/img/import.png'))
+#	toolbar = self.CreateToolBar(wx.TB_TEXT)
+#	toolbar.AddLabelTool(1, 'Import', wx.Bitmap('assets/img/import.png'))
 #		toolbar.AddLabelTool(1, 'Publish', wx.Bitmap('assets/img/publish.png'))
 #		toolbar.AddLabelTool(1, 'Settings', wx.Bitmap('assets/img/settings.png'))
-		toolbar.Realize()
+#	toolbar.Realize()
 
 
 		# Creating the menubar.
@@ -33,9 +33,9 @@ class MainWindow(wx.Frame):
 		# Filemenu
 		filemenu = wx.Menu()
 		# wx.ID_ABOUT and wx.ID_EXIT are standard ids provided by wxWidgets.
+		menuImport = filemenu.Append(wx.NewId(),"&Import from VBar Control"," Import data from VControl")
 		menuAbout = filemenu.Append(wx.ID_ABOUT, "&About"," Information about this program")
 		menuExit = filemenu.Append(wx.ID_EXIT,"E&xit"," Terminate the program")
-		menuImport = filemenu.Append(wx.NewId(),"&Import"," Import data from VControl")
  		menuBar.Append(filemenu, "&File") # Adding the "filemenu" to the MenuBar
 
 		self.SetMenuBar(menuBar)  # Adding the MenuBar to the Frame content.
@@ -52,8 +52,8 @@ class MainWindow(wx.Frame):
 		panelTop.SetSizer(sizerTopHoriz)
 
 		# Date panel
-		panelDate = wx.Panel(panelTop, -1, style=wx.BORDER_RAISED)
-		sizerTopHoriz.Add(panelDate, 0, wx.ALL | wx.EXPAND, 5)
+		panelDate = wx.Panel(panelTop, -1)
+		sizerTopHoriz.Add(panelDate, 0, wx.ALL, 5)
 		sizerDate = wx.BoxSizer(wx.VERTICAL)
 		panelDate.SetSizer(sizerDate)
 
@@ -104,7 +104,6 @@ class MainWindow(wx.Frame):
 		self.connection_img = wx.StaticBitmap(panelStatus, bitmap=bitmap)
 		sizerStatus.Add(self.connection_img, 0, wx.CENTER)
 
-
 		# Grid
 		self.grid = wx.grid.Grid(self)
 		self.grid.CreateGrid(10, 10)
@@ -133,22 +132,19 @@ class MainWindow(wx.Frame):
 		self.populate_gear()
 		self.populate_grid()
 
-		sizerMainVert.Add(panelTop, 1, wx.EXPAND)
+		sizerMainVert.Add(panelTop, 0, wx.EXPAND)
 		sizerMainVert.Add(self.grid, 1, wx.EXPAND)
-
 
 		self.SetSizer(sizerMainVert)
 		sizerMainVert.Fit(self)
 		self.SetSize(wx.Size(-1, 600))
 
-		print "init timer"
 		TIMER_ID = 100  # pick a number
 		self.timer = wx.Timer(self, TIMER_ID)  # message will be sent to the panel
 		self.timer.Start(1000)  # x100 milliseconds
 		wx.EVT_TIMER(self, TIMER_ID, self.on_timer)  # call the on_timer function
 
 		self._vcontrol_connected = False
-
 		self.Show()
 
 	def OnDateChanged(self, event):
@@ -163,16 +159,23 @@ class MainWindow(wx.Frame):
 		self.populate_grid()
 
 	def OnAbout(self,e):
-		# Create a message dialog box
 		dlg = wx.MessageDialog(self, "By Linus Larsson (linus.larsson@gmail.com)",  "       VBar control log analyzer", wx.OK)
-		dlg.ShowModal() # Shows it
-		dlg.Destroy() # finally destroy it when finished.
+		dlg.ShowModal()
+		dlg.Destroy()
 
 	def OnExit(self,e):
 		self.Close(True)  # Close the frame.
 
 	def OnImport(self, e):
-		self.Close(True)  # Close the frame.
+		if self.analyzer.vcontrol_is_connected() == False:
+			dlg = wx.MessageDialog(self, "Unable to find VBar Control", "VBar Control message", wx.OK)
+			dlg.ShowModal()
+			dlg.Destroy()
+			return
+		self.SetStatusText('Importing from VBar Control, please wait...')
+		self.analyzer.import_data()
+		self.populate_gear()
+		self.populate_grid()
 
 	def populate_gear(self):
 		self.batterySelected = None
