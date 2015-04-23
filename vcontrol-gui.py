@@ -16,7 +16,7 @@ class MainWindow(wx.Frame):
 
 		interval = self.analyzer.get_date_interval()
 
-		wx.Frame.__init__(self, None, title='VBar control log analyzer', size=(1024,800))
+		wx.Frame.__init__(self, None, title='VBar control log analyzer', size=(1024,600))
 		self.CreateStatusBar()
 
 		# Toolbar
@@ -139,7 +139,7 @@ class MainWindow(wx.Frame):
 
 		self.SetSizer(sizerMainVert)
 		sizerMainVert.Fit(self)
-		self.SetSize(wx.Size(-1, 800))
+		self.SetSize(wx.Size(-1, 600))
 		self.Show()
 
 	def OnDateChanged(self, event):

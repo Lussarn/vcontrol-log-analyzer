@@ -3,7 +3,6 @@
 import sys
 import VBarLogAnalyzer
 
-
 def usage():
 	print "vcontrol --help                                     This help"
 	print "vcontrol --import [PATH_TO_VCONTROL]                import data from vbar control"
