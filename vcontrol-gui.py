@@ -52,7 +52,7 @@ class MainWindow(wx.Frame):
 		panelTop.SetSizer(sizerTopHoriz)
 
 		# Date panel
-		panelDate = wx.Panel(self, -1, style=wx.BORDER_RAISED)
+		panelDate = wx.Panel(panelTop, -1, style=wx.BORDER_RAISED)
 		sizerTopHoriz.Add(panelDate, 0, wx.ALL | wx.EXPAND, 5)
 		sizerDate = wx.BoxSizer(wx.VERTICAL)
 		panelDate.SetSizer(sizerDate)
@@ -70,7 +70,7 @@ class MainWindow(wx.Frame):
 		self.datePickerEnd.Bind(wx.EVT_DATE_CHANGED, self.OnDateChanged)
 
 		# Battery
-		panelBattery = wx.Panel(self, -1, style=wx.BORDER_RAISED)
+		panelBattery = wx.Panel(panelTop, -1, style=wx.BORDER_RAISED)
 		sizerBattery = wx.BoxSizer(wx.VERTICAL)
 		sizerBattery.Add(wx.StaticText(panelBattery, label='Battery'), 0, wx.ALIGN_LEFT | wx.LEFT | wx.RIGHT | wx.TOP, 5)
 		self.listBoxBattery = wx.ListBox(panelBattery, size=(200,100))
@@ -80,7 +80,7 @@ class MainWindow(wx.Frame):
 		self.listBoxBattery.Bind(wx.EVT_LISTBOX, self.OnSelectBattery)
 
 		# Model
-		panelModel = wx.Panel(self, -1, style=wx.BORDER_RAISED)
+		panelModel = wx.Panel(panelTop, -1, style=wx.BORDER_RAISED)
 		sizerModel = wx.BoxSizer(wx.VERTICAL)
 		sizerModel.Add(wx.StaticText(panelModel, label='Model'), 0, wx.ALIGN_LEFT | wx.LEFT | wx.RIGHT | wx.TOP, 5)
 		self.listBoxModel = wx.ListBox(panelModel, size=(200,100))
@@ -91,11 +91,11 @@ class MainWindow(wx.Frame):
 
 
 		# Connection status
-		panelStretch = wx.Panel(self, -1) 
+		panelStretch = wx.Panel(panelTop, -1) 
 		sizerStretch = wx.BoxSizer(wx.VERTICAL)
 		panelStretch.SetSizer(sizerStretch)
 		sizerTopHoriz.Add(panelStretch, 1, wx.EXPAND)
-		panelStatus = wx.Panel(panelStretch, -1, style=wx.BORDER_RAISED)
+		panelStatus = wx.Panel(panelStretch, -1)
 		sizerStatus = wx.BoxSizer(wx.VERTICAL)
 		panelStatus.SetSizer(sizerStatus)
 		sizerStretch.Add(panelStatus, 1, wx.ALIGN_RIGHT | wx.LEFT | wx.RIGHT | wx.TOP | wx.BOTTOM, 5)
@@ -103,7 +103,7 @@ class MainWindow(wx.Frame):
 		self.bitmap_connection_off = wx.Bitmap('assets/img/ball-red.png', wx.BITMAP_TYPE_ANY)
 		self.bitmap_connection_on = wx.Bitmap('assets/img/ball-green.png', wx.BITMAP_TYPE_ANY)
 		self.connection_img = wx.StaticBitmap(panelStatus, bitmap=self.bitmap_connection_off)
-		sizerStatus.Add(self.connection_img, 1,  wx.CENTER | wx.TOP, 25)
+		sizerStatus.Add(self.connection_img, 1,  wx.CENTER | wx.TOP)
 
 		# Grid
 		self.grid = wx.grid.Grid(self)
