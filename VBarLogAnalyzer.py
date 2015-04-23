@@ -92,7 +92,7 @@ class Analyzer:
 	def import_data(self):
 		base = self._find_vcontrol_path()
 
-		batteryPath = base + '/battery';
+		batteryPath = os.path.join(base, 'battery')
 		if not os.path.isdir(batteryPath):
 			self.error = "VControl path not found, mounted?"
 			return False
@@ -148,9 +148,18 @@ class Analyzer:
 			if lines.find(' /Volumes/VControl ') >= 0:
 				path = '/Volumes/VControl'
 		elif 'win' in sys.platform:
-			drivelist = subprocess.Popen('wmic logicaldisk get name,label', shell=True, stdout=subprocess.PIPE)
+			drivelist = subprocess.Popen('wmic volume get driveletter,label', shell=True, stdout=subprocess.PIPE)
 			lines, err = drivelist.communicate()
-			
+			lines = lines.split('\r\n')
+			path = None
+			for line in lines:
+				words = line.split()
+				if len(words) < 2:
+					continue
+				if words[1] == "VControl":
+					path = words[0] + '\\'
+					break
+
 		return path
 
 	def vcontrol_is_connected(self):
