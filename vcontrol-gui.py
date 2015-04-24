@@ -193,7 +193,7 @@ class MainWindow(wx.Frame):
 		self.listBoxBattery.Select(0)
 		self.listBoxBattery.EnsureVisible(0)
 
-
+		self.models = []
 		self.listBoxModel.Clear()
 		self.listBoxModel.Append('All models')
 		self.models.append(None)
@@ -211,6 +211,9 @@ class MainWindow(wx.Frame):
 
 		start = self._wxdate2pydate(self.datePickerStart.GetValue())
 		end = self._wxdate2pydate(self.datePickerEnd.GetValue())
+
+		print self.batterySelected
+		print self.modelSelected
 
 		data = self.analyzer.extract(batteryid=self.batterySelected, modelid=self.modelSelected, start=start, end=end)
 
