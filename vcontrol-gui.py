@@ -100,7 +100,7 @@ class MainWindow(wx.Frame):
 		panelStatus.SetSizer(sizerStatus)
 		sizerStretch.Add(panelStatus, 1, wx.ALIGN_RIGHT | wx.LEFT | wx.RIGHT | wx.TOP | wx.BOTTOM, 5)
 		sizerStatus.Add(wx.StaticText(panelStatus, label='Connection status'), 0, wx.ALIGN_LEFT | wx.LEFT | wx.RIGHT | wx.TOP | wx.BOTTOM, 5)
-		bitmap = wx.Bitmap('assets/img/ball-red.png', wx.BITMAP_TYPE_ANY)
+		bitmap = wx.Bitmap(self.resource_path('assets/img/ball-red.png'), wx.BITMAP_TYPE_ANY)
 		self.connection_img = wx.StaticBitmap(panelStatus, bitmap=bitmap)
 		sizerStatus.Add(self.connection_img, 0, wx.CENTER)
 
@@ -254,13 +254,13 @@ class MainWindow(wx.Frame):
 			if self._vcontrol_connected == True:
 				return
 			self._vcontrol_connected = True
-			bitmap = wx.Bitmap('assets/img/ball-green.png', wx.BITMAP_TYPE_ANY)
+			bitmap = wx.Bitmap(self.resource_path('assets/img/ball-green.png'), wx.BITMAP_TYPE_ANY)
 			self.connection_img.SetBitmap(bitmap)
 		else:
 			if self._vcontrol_connected == False:
 				return
 			self._vcontrol_connected = False
-			bitmap = wx.Bitmap('assets/img/ball-red.png', wx.BITMAP_TYPE_ANY)
+			bitmap = wx.Bitmap(self.resource_path('assets/img/ball-red.png'), wx.BITMAP_TYPE_ANY)
 			self.connection_img.SetBitmap(bitmap)
 
 	def _pydate2wxdate(self, date):
@@ -275,6 +275,14 @@ class MainWindow(wx.Frame):
 		else:
 			return None
 
+	def resource_path(self, relative_path):
+		try:
+			# PyInstaller creates a temp folder and stores path in _MEIPASS
+			base_path = sys._MEIPASS
+		except Exception:
+			base_path = os.path.abspath(".")
+
+		return os.path.join(base_path, relative_path)
 
 app = wx.App(False)
 app.SetAppName("VBar control log analyzer")
