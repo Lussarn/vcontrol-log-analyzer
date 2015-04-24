@@ -4,8 +4,10 @@ a = Analysis(['vcontrol-gui.py'],
              hiddenimports=[],
              hookspath=None,
              runtime_hooks=None)
-a.datas += [('assets/img/ball-green.png', 'C:\\Users\\Linus\\Desktop\\python\\vcontrol-log-analyzer\\assets\\img\\ball-green.png','DATA'),
-('assets/img/ball-red.png', 'C:\\Users\\Linus\\Desktop\\python\\vcontrol-log-analyzer\\assets\\img\\ball-red.png','DATA')] 
+a.datas += [
+  ('assets/img/ball-green.png', 'C:\\Users\\Linus\\Desktop\\python\\vcontrol-log-analyzer\\assets\\img\\ball-green.png','DATA'),
+  ('assets/img/ball-red.png', 'C:\\Users\\Linus\\Desktop\\python\\vcontrol-log-analyzer\\assets\\img\\ball-red.png','DATA')
+]
 for d in a.datas:
     if 'pyconfig' in d[0]: 
         a.datas.remove(d)
@@ -20,4 +22,4 @@ exe = EXE(pyz,
           debug=False,
           strip=None,
           upx=True,
-          console=False )
+          console=True )
