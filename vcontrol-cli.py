@@ -71,13 +71,17 @@ def extract():
 
 	print header
 	print "| Id    | Date                | Battery             | Model               | Duration | Capacity | Used        | MinV  | MaxA  | IdleV |" 
-	print header
+#	print header
 
+	session = 0
 	for row in data['data']:
+		if session != row['session']:
+			session = row['session']
+			print header
 		print "| {0:<6}| {1:<20}| {2:<20}| {3:<20}| {4:<9}| {5:<9}| {6:<12}| {7:<6}| {8:<6}| {9:<6}|".format(row['id'],row['date'],row['battery'],row['model'], row['duration'],row['capacity'],row['used'], row['minv'], row['maxa'], row['idlev'])
 
 	print header
-	print "| Cycles: {0:<19} | Capacity used: {1:<26} | Duration: {2:<47} |".format(str(data['totals']['cycles']), str(data['totals']['used']) + "Ah", data['totals']['duration'])
+	print "| Cycles: {0:<19} | Capacity used: {1:<26} | Duration: {2:<23} | Sessions: {3:<11} |".format(str(data['totals']['cycles']), str(data['totals']['used']) + "Ah", data['totals']['duration'], data['totals']['sessions'])
 	print header2
 
 def import_data():

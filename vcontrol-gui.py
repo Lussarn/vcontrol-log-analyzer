@@ -16,7 +16,7 @@ class MainWindow(wx.Frame):
 
 		interval = self.analyzer.get_date_interval()
 
-		wx.Frame.__init__(self, None, title='VBar control log analyzer', size=(1024,600))
+		wx.Frame.__init__(self, None, title='VBar Control flight analyzer 2.0.3', size=(1024,600))
 		self.CreateStatusBar()
 
 		# Toolbar
@@ -217,6 +217,7 @@ class MainWindow(wx.Frame):
 		i = 0
 		start = None
 		end = None
+		session = 0
 		for d in data['data']:
 			self.grid.InsertRows(i, 1)
 			self.grid.SetCellValue(i,0, str(d['id']))
@@ -231,10 +232,16 @@ class MainWindow(wx.Frame):
 			self.grid.SetCellValue(i,9, str(d['idlev']))
 
 			attr = wx.grid.GridCellAttr();
-			if i % 2 == 1:
-				attr.SetBackgroundColour(wx.Colour(255,255,255))
+			if d['session'] % 2 == 1:
+				if i % 2 == 1:
+					attr.SetBackgroundColour(wx.Colour(200,255,200))
+				else:
+					attr.SetBackgroundColour(wx.Colour(140,200,140))
 			else:
-				attr.SetBackgroundColour(wx.Colour(220,220,220))
+				if i % 2 == 1:
+					attr.SetBackgroundColour(wx.Colour(200,200,255))
+				else:
+					attr.SetBackgroundColour(wx.Colour(140,140,200))
 
 			self.grid.SetRowAttr(i, attr)
 			i += 1

@@ -190,17 +190,27 @@ class Analyzer:
 		capacityused = 0;
 		flighttime = 0
 		data = []
+		session = 0
+		olddate = datetime.datetime(1970,1,1)
 		for row in cur.execute(sql):
+			# Calculate the session based on date
+			date = datetime.datetime.strptime(row[3], '%Y-%m-%d %H:%M:%S')
+			datediff = date - olddate
+			delta_seconds = datediff.total_seconds()
+			if delta_seconds > (60 * 60 * 3):
+				session += 1
+
 			capacityused += row[6];
 			cycles += 1
 			duration = "{0:02d}:{1:02d}".format(int(row[4] / 60), int(row[4] % 60))
 			flighttime += row[4]
 			used = str(row[6]) + ' (' + str(int(float(row[6]) / row[5] * 100)) + '%)'
-			data.append({'id': row[0], 'date': row[3], 'battery': row[1], 'model': row[2], 'duration': duration, 'capacity': row[5], 'used': used, 'minv': row[7], 'maxa': row[8], 'idlev': row[9]})
+			data.append({'id': row[0], 'date': row[3], 'battery': row[1], 'model': row[2], 'duration': duration, 'capacity': row[5], 'used': used, 'minv': row[7], 'maxa': row[8], 'idlev': row[9], 'session': session})
+			olddate = date
 
 		capacityused = round(float(capacityused) / 1000, 2)
 		t = "{0:02d}:{1:02d}:{2:02d}".format(int(flighttime / 3600), int((flighttime % 3600) / 60), int(flighttime % 60))
-		totals = {'cycles': cycles, 'used': capacityused, 'duration': t}; 
+		totals = {'cycles': cycles, 'used': capacityused, 'duration': t, 'sessions':session}; 
 		return {'data' : data, 'totals': totals }
 
 	def get_date_interval(self):
