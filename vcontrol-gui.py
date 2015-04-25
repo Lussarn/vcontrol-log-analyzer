@@ -254,7 +254,7 @@ class MainWindow(wx.Frame):
 			w = self.grid.GetColSize(i)
 			self.grid.SetColSize(i, w + 20)
 
-		self.SetStatusText('Cycles: ' + str(data['totals']['cycles']) + '   Used capacity: ' + str(data['totals']['used']) + "Ah   Duration: " +str(data['totals']['duration']))
+		self.SetStatusText('Cycles: ' + str(data['totals']['cycles']) + '   Used capacity: ' + str(data['totals']['used']) + "Ah   Duration: " +str(data['totals']['duration']) + "   Sessions: " + str(data['totals']['sessions']))
 
 	def on_timer(self, event):
 		if self.analyzer.vcontrol_is_connected():
