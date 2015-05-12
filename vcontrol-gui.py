@@ -16,7 +16,7 @@ class MainWindow(wx.Frame):
 
 		interval = self.analyzer.get_date_interval()
 
-		wx.Frame.__init__(self, None, title='VBar Control flight analyzer 2.0.3', size=(1024,600))
+		wx.Frame.__init__(self, None, title='VBar Control flight analyzer 2.0.4', size=(1024,600))
 		self.CreateStatusBar()
 
 		# Toolbar
@@ -174,6 +174,11 @@ class MainWindow(wx.Frame):
 			return
 		self.SetStatusText('Importing from VBar Control, please wait...')
 		self.analyzer.import_data()
+
+		interval = self.analyzer.get_date_interval()
+		self.datePickerStart.SetValue(dt=self._pydate2wxdate(interval['first']))
+		self.datePickerEnd.SetValue(dt=self._pydate2wxdate(interval['last']))
+
 		self.populate_gear()
 		self.populate_grid()
 
