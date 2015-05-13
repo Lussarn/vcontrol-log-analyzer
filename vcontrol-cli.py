@@ -4,10 +4,11 @@ import sys
 import VBarLogAnalyzer
 
 def usage():
-	print "vcontrol --help                                     This help"
-	print "vcontrol --import [PATH_TO_VCONTROL]                import data from vbar control"
-	print "vcontrol --list                                     List batteries and models"
-	print "vcontrol --extract [model=id]                       Extract data" 
+	print "vcontrol-cli.py --help                            This help"
+	print "vcontrol-cli.py --version                         Version information"
+	print "vcontrol-cli.py --import [PATH_TO_VCONTROL]       import data from vbar control"
+	print "vcontrol-cli.py --list                            List batteries and models"
+	print "vcontrol-cli.py --extract [model=id]              Extract data" 
 	print "                   [battery=id]" 
 	print "                   [start=YYYY-MM-DD]"
 	print "                   [end=YYYY-MM-DD]"
@@ -121,6 +122,8 @@ def main():
 		extract()
 	elif command == '--help':
 		usage()
+	elif command == '--version':
+		print "vcontrol-cli v2.0.5"
 	else:
 		usage()
 

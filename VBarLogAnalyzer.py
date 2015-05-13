@@ -117,7 +117,10 @@ class Analyzer:
 				minvoltage = cols.pop(0)
 				maxampere = cols.pop(0)
 				uid = cols.pop(0)
-				model = cols.pop(0)
+				if len(cols) == 0:
+					model = "Unknown model"
+				else:
+					model = cols.pop(0)
 				modelid = self.get_model_id(model)
 
 				cur = self._db().cursor()
@@ -133,6 +136,7 @@ class Analyzer:
 
 	def _find_vcontrol_path(self):
 		if 'linux' in sys.platform:
+#			return "/tmp";
 			drives=subprocess.Popen('mount', shell=True, stdout=subprocess.PIPE)
 			lines, err=drives.communicate()
 			words = lines.split()
