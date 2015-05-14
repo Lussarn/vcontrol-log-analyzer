@@ -108,6 +108,8 @@ class Analyzer:
 
 			for line in lines:
 				cols = line.split(';')
+				if len(cols) < 8:
+					continue
 
 				date = cols.pop(0)
 				date = time.strftime('%Y-%m-%d %H:%M:%S', time.strptime(date,'%d.%m.%Y %H:%M:%S'))
