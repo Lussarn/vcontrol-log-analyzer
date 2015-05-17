@@ -16,7 +16,7 @@ class MainWindow(wx.Frame):
 
 		interval = self.analyzer.get_date_interval()
 
-		wx.Frame.__init__(self, None, title='VBar Control flight analyzer 2.0.6', size=(1024,600))
+		wx.Frame.__init__(self, None, title='VBar Control flight analyzer 2.0.7', size=(1024,600))
 		self.CreateStatusBar()
 
 		# Toolbar

@@ -154,7 +154,11 @@ class Analyzer:
 			if lines.find(' /Volumes/VControl ') >= 0:
 				path = '/Volumes/VControl'
 		elif 'win' in sys.platform:
-			drivelist = subprocess.Popen('wmic volume get driveletter,label', shell=True, stdout=subprocess.PIPE)
+			cmd = 'wmic'
+			if os.path.isfile('c:\\windows\\system32\\wbem\\wmic.exe'):
+				cmd = 'c:\\windows\\system32\\wbem\\wmic.exe'
+
+			drivelist = subprocess.Popen(cmd + ' volume get driveletter,label', shell=False, stdout=subprocess.PIPE)
 			lines, err = drivelist.communicate()
 			lines = lines.split('\r\n')
 			path = None

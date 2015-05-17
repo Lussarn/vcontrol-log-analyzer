@@ -123,11 +123,7 @@ def main():
 	elif command == '--help':
 		usage()
 	elif command == '--version':
-<<<<<<< HEAD
-		print "vcontrol-cli v2.0.5"
-=======
-		print "vcontrol-cli v2.0.6"
->>>>>>> develop
+		print "vcontrol-cli v2.0.7"
 	else:
 		usage()
 
