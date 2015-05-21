@@ -1,10 +1,23 @@
 #!/usr/bin/python
 
+from numpy import arange, sin, pi, arange
+import matplotlib
+matplotlib.use('WXAgg')
+
+from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg as FigureCanvas
+from matplotlib.backends.backend_wx import NavigationToolbar2Wx
+from matplotlib.figure import Figure
+from matplotlib.ticker import MaxNLocator
+from matplotlib.ticker import FixedLocator
+
+
+import math
 import wx
 import wx.grid
 import os
 import VBarLogAnalyzer
 import datetime
+from sets import Set
 
 class MainWindow(wx.Frame):
 	def __init__(self):
@@ -89,9 +102,24 @@ class MainWindow(wx.Frame):
 		sizerTopHoriz.Add(panelModel, 0, wx.ALIGN_LEFT | wx.RIGHT | wx.TOP | wx.BOTTOM, 5)
 		self.listBoxModel.Bind(wx.EVT_LISTBOX, self.OnSelectModel)
 
+		# Stack
+		self.panelStack = wx.Panel(panelTop, -1)
+		sizerStack = wx.BoxSizer(wx.VERTICAL)
+		self.panelStack.SetSizer(sizerStack)
+		sizerStack.Add(wx.StaticText(self.panelStack, label='Stack graph as'), 0, wx.ALIGN_LEFT | wx.LEFT | wx.RIGHT | wx.TOP, 5)
+		self.radioModel = wx.RadioButton(self.panelStack, 0, "Model", style = wx.RB_GROUP)
+		self.radioGraph = wx.RadioButton(self.panelStack, 0, "Battery")
+		self.radioModel.SetValue(True)
+		self.stackUse = 'model'
+		sizerStack.Add(self.radioModel,  1, wx.ALIGN_LEFT | wx.LEFT | wx.RIGHT | wx.BOTTOM | wx.TOP, 5)
+		sizerStack.Add(self.radioGraph,  1, wx.ALIGN_LEFT | wx.LEFT | wx.RIGHT | wx.BOTTOM, 5)
+		sizerTopHoriz.Add(self.panelStack, 0, wx.ALL, 5)
+		self.radioModel.Bind(wx.EVT_RADIOBUTTON, self.OnSelectStack)
+		self.radioGraph.Bind(wx.EVT_RADIOBUTTON, self.OnSelectStack)
+
 
 		# Connection status
-		panelStretch = wx.Panel(panelTop, -1) 
+		panelStretch = wx.Panel(panelTop, -1)
 		sizerStretch = wx.BoxSizer(wx.VERTICAL)
 		panelStretch.SetSizer(sizerStretch)
 		sizerTopHoriz.Add(panelStretch, 1, wx.EXPAND)
@@ -104,8 +132,19 @@ class MainWindow(wx.Frame):
 		self.connection_img = wx.StaticBitmap(panelStatus, bitmap=bitmap)
 		sizerStatus.Add(self.connection_img, 0, wx.CENTER)
 
+		# Add top panel to main vertical sizer
+		sizerMainVert.Add(panelTop, 0, wx.EXPAND)
+
+		# Notebook
+		nb = wx.Notebook(self)
+
 		# Grid
-		self.grid = wx.grid.Grid(self)
+		pageGrid = wx.Panel(nb)
+		sizerPagerGrid = wx.BoxSizer(wx.VERTICAL)
+		pageGrid.SetSizer(sizerPagerGrid)
+		nb.AddPage(pageGrid, "Data view")
+
+		self.grid = wx.grid.Grid(pageGrid)
 		self.grid.CreateGrid(10, 10)
 
 		self.grid.ClipHorzGridLines(False)
@@ -129,11 +168,32 @@ class MainWindow(wx.Frame):
 		self.grid.SetColLabelValue(8, 'MaxA')
 		self.grid.SetColLabelValue(9, 'IdleV')
 
-		self.populate_gear()
-		self.populate_grid()
+		sizerPagerGrid.Add(self.grid, 1, wx.EXPAND)
 
-		sizerMainVert.Add(panelTop, 0, wx.EXPAND)
-		sizerMainVert.Add(self.grid, 1, wx.EXPAND)
+		# Graph
+		pageGraph = wx.Panel(nb)
+		sizerPagerGraph = wx.BoxSizer(wx.VERTICAL)
+		pageGraph.SetSizer(sizerPagerGraph)
+		nb.AddPage(pageGraph, "Graph view")
+
+		self.figure = Figure()
+		self.figure.suptitle('Cycles / week', fontsize=14, fontweight='bold')
+		self.axes = self.figure.add_subplot(111)
+		canvas = FigureCanvas(pageGraph, -1, self.figure)
+		sizerPagerGraph.Add(canvas, 1, wx.EXPAND)
+		self.figure.tight_layout(rect=[0,0.1,1,0.95])
+		self.axes.xaxis.set_tick_params(width=0)
+		self.axes.yaxis.grid(True)
+		self.axes.yaxis.set_label_text('Cycles', fontsize=12, fontweight='bold')
+		self.axes.xaxis.set_label_text('Week number', fontsize=12, fontweight='bold')
+
+		self.figure.suptitle('Cycles / week', fontsize=14, fontweight='bold')
+		self.figure.tight_layout(rect=[0.03,0.1,1,0.95])
+
+
+		# Add notebook
+		sizerMainVert.Add(nb, 1, wx.EXPAND)
+		nb.Bind(wx.EVT_NOTEBOOK_PAGE_CHANGING, self.OnNotebookChanged)
 
 		self.SetSizer(sizerMainVert)
 		sizerMainVert.Fit(self)
@@ -145,7 +205,25 @@ class MainWindow(wx.Frame):
 		wx.EVT_TIMER(self, TIMER_ID, self.on_timer)  # call the on_timer function
 
 		self._vcontrol_connected = False
+
+		self.populate_gear()
+		self.populate_grid()
+
 		self.Show()
+		self.panelStack.Hide()
+
+	def OnNotebookChanged(self, event):
+		if event.GetSelection() == 0:
+			self.panelStack.Hide()
+		elif event.GetSelection() == 1:
+			self.panelStack.Show()
+
+	def OnSelectStack(self, event):
+		if event.GetEventObject() == self.radioModel:
+			self.stackUse = 'model'
+		else:
+			self.stackUse = 'battery'
+		self.populate_grid()		
 
 	def OnDateChanged(self, event):
 		self.populate_grid()		
@@ -211,6 +289,7 @@ class MainWindow(wx.Frame):
 
 
 	def populate_grid(self):
+		# Grid
 		if self.grid.GetNumberRows() > 0:
 			self.grid.DeleteRows(0, self.grid.GetNumberRows())
 
@@ -261,6 +340,67 @@ class MainWindow(wx.Frame):
 
 		self.SetStatusText('Cycles: ' + str(data['totals']['cycles']) + '   Used capacity: ' + str(data['totals']['used']) + "Ah   Duration: " +str(data['totals']['duration']) + "   Sessions: " + str(data['totals']['sessions']))
 
+		# Graph
+		self.axes.clear()
+		self.figure.suptitle('Cycles / week', fontsize=14, fontweight='bold')
+		self.axes = self.figure.add_subplot(111)
+		self.figure.tight_layout(rect=[0.03,0.1,0.85,0.95])
+		self.axes.xaxis.set_tick_params(width=0)
+		self.axes.yaxis.grid(True)
+		self.axes.yaxis.set_label_text('Cycles', fontsize=12, fontweight='bold')
+		self.axes.xaxis.set_label_text('Week number', fontsize=12, fontweight='bold')
+
+		data = self.analyzer.extract_byweek(batteryid=self.batterySelected, modelid=self.modelSelected, start=start, end=end, group=self.stackUse)
+		if len(data['data']) == 0:
+			data['data'].append({'week': '00     ', 'group': {}})
+		i = 0
+		ticks = []
+		allColors = list(reversed(
+			[
+			'#000080','#008000','#008080','#800000','#800080','#808000','#808080',
+			'#0000f0','#00f000','#00f0f0','#f00000','#f000f0','#f0f000','#f0f0f0'
+			'#0000b0','#00b000','#00b0b0','#b00000','#b000b0','#b0b000','#b0b0b0'
+			'#000040','#004000','#004040','#400000','#400040','#404000','#404040'
+			]
+			))
+		colors = allColors
+		modelColors = {}
+		for week in data['data']:
+			b = 0
+			for model in week['group']:
+				cycles = week['group'][model]
+				if model in modelColors:
+					color = modelColors[model]
+					legend = None
+				else:
+					if len(colors) == 0:
+						colors = allColors
+					color = colors.pop()
+					modelColors[model] = color
+					legend = model	
+				self.axes.bar(left=i-0.4, height=cycles, width=0.8, bottom=b, color=color, orientation="vertical",label=legend)
+				b += cycles
+
+			ticks.append(week['week'][2:])
+			i += 1
+
+		handles, labels = self.axes.get_legend_handles_labels()
+		self.axes.legend(handles, labels, bbox_to_anchor=(1.2, 1.01), prop={'size': 10})
+
+		keep = []
+		for k in arange(0, len(ticks), float(len(ticks)) / 53):
+			keep.append(int(round(k)))
+
+		keep = Set(keep)
+
+		for i in xrange(len(ticks)):
+			if not i in keep:
+				ticks[i] = ''
+
+		self.axes.xaxis.set_major_locator(FixedLocator(arange(0,len(ticks))))
+		self.axes.set_xticklabels(ticks, horizontalalignment='center', rotation=90, fontsize=8)
+		self.figure.canvas.draw()
+
 	def on_timer(self, event):
 		if self.analyzer.vcontrol_is_connected():
 			if self._vcontrol_connected == True:
@@ -300,8 +440,5 @@ app = wx.App(False)
 app.SetAppName("VBar control log analyzer")
 app.SetMacHelpMenuTitleName("VControl")
 
-
-
 frame = MainWindow()
-frame.Show(True)
 app.MainLoop()
