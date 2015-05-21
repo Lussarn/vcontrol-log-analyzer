@@ -16,6 +16,7 @@ import wx
 import wx.grid
 import os
 import VBarLogAnalyzer
+import Variable
 import datetime
 from sets import Set
 
@@ -29,8 +30,12 @@ class MainWindow(wx.Frame):
 
 		interval = self.analyzer.get_date_interval()
 
-		wx.Frame.__init__(self, None, title='VBar Control flight analyzer 2.2.0', size=(1024,600))
+		w = int(Variable.get('gui-window-width', '1024'))
+		h = int(Variable.get('gui-window-height', '600'))
+
+		wx.Frame.__init__(self, None, title='VBar Control flight analyzer 2.2.0', size=(w, h))
 		self.CreateStatusBar()
+
 
 		# Toolbar
 #	toolbar = self.CreateToolBar(wx.TB_TEXT)
@@ -197,7 +202,7 @@ class MainWindow(wx.Frame):
 
 		self.SetSizer(sizerMainVert)
 		sizerMainVert.Fit(self)
-		self.SetSize(wx.Size(-1, 600))
+		self.SetSize(wx.Size(w, h))
 
 		TIMER_ID = 100  # pick a number
 		self.timer = wx.Timer(self, TIMER_ID)  # message will be sent to the panel
@@ -211,6 +216,12 @@ class MainWindow(wx.Frame):
 
 		self.Show()
 		self.panelStack.Hide()
+		self.Bind(wx.EVT_SIZE, self.OnSize)
+
+	def OnSize(self,event):
+		Variable.set('gui-window-width', str(event.GetSize()[0]))
+		Variable.set('gui-window-height', str(event.GetSize()[1]))
+		event.Skip()
 
 	def OnNotebookChanged(self, event):
 		if event.GetSelection() == 0:
