@@ -235,4 +235,41 @@ class Analyzer:
 			'last': datetime.datetime.strptime(rs[1][0:10],'%Y-%m-%d')
 		}
 
+	def extract_byweek(self, batteryid=None, modelid=None, start=None, end=None, group='model'):
+		sql = "\
+			SELECT (STRFTIME('%Y', date) || '-' || STRFTIME('%W', date)),count(*) AS week FROM batterylog WHERE used * 4 > capacity GROUP BY (STRFTIME('%Y', date) || '-' || STRFTIME('%W', date))"
 
+		data = self.extract(batteryid,modelid,start,end)
+		out = []
+
+		if len(data['data']) > 0:
+			current = datetime.datetime.strptime(data['data'][0]['date'], '%Y-%m-%d %H:%M:%S');
+			currentYear = current.isocalendar()[0];
+			currentWeek = current.isocalendar()[1];
+			current = datetime.datetime.strptime(str(currentYear) + "-" + str(currentWeek - 1) + "-1", '%Y-%W-%w');
+			currentWeekStr = str(current.isocalendar()[0]) + "-" + str(current.isocalendar()[1])
+			out.append({'week': currentWeekStr, 'group': {}})
+
+			data['data'] = list(reversed(data['data']))
+
+			while True:
+				row = data['data'][-1]
+				rowDate = datetime.datetime.strptime(row['date'], '%Y-%m-%d %H:%M:%S').isocalendar();
+				year = rowDate[0];
+				week = rowDate[1];
+				weekStr = str(year) + "-" + str(week)
+				if out[-1]['week'] == weekStr:
+					if row[group] not in out[-1]['group']:
+						out[-1]['group'][row[group]] = 0
+					out[-1]['group'][row[group]] += 1
+					data['data'].pop()
+					if len(data['data']) == 0:
+						break
+				else:
+					current = current + datetime.timedelta(days=7)
+					currentWeekStr = str(current.isocalendar()[0]) + "-" + str(current.isocalendar()[1])
+					out.append({'week': currentWeekStr, 'group': {}})
+
+
+		data['data'] = out
+		return data
