@@ -198,7 +198,7 @@ class MainWindow(wx.Frame):
 
 		# Add notebook
 		sizerMainVert.Add(nb, 1, wx.EXPAND)
-		nb.Bind(wx.EVT_NOTEBOOK_PAGE_CHANGING, self.OnNotebookChanged)
+		nb.Bind(wx.EVT_NOTEBOOK_PAGE_CHANGED, self.OnNotebookChanged)
 
 		self.SetSizer(sizerMainVert)
 		sizerMainVert.Fit(self)
@@ -228,6 +228,7 @@ class MainWindow(wx.Frame):
 			self.panelStack.Hide()
 		elif event.GetSelection() == 1:
 			self.panelStack.Show()
+		event.Skip()
 
 	def OnSelectStack(self, event):
 		if event.GetEventObject() == self.radioModel:
