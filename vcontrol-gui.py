@@ -385,6 +385,7 @@ class MainWindow(wx.Frame):
 		self.axes.xaxis.set_label_text('Week number', fontsize=12, fontweight='bold')
 
 		data = self.analyzer.extract_byweek(batteryid=self.batterySelected, modelid=self.modelSelected, start=start, end=end, group=self.stackUse)
+
 		if len(data['data']) == 0:
 			data['data'].append({'week': '00     ', 'group': {}})
 		i = 0
@@ -402,9 +403,9 @@ class MainWindow(wx.Frame):
 			(247, 182, 210), (199, 199, 199),
 			(219, 219, 141),  (158, 218, 229)
 			]))
-		for i in range(len(allColors)):
-			r, g, b = allColors[i]
-			allColors[i] = (r / 255., g / 255., b / 255.)
+		for ii in range(len(allColors)):
+			rr, gg, bb = allColors[ii]
+			allColors[ii] = (rr / 255., gg / 255., bb / 255.)
 
 
 		colors = allColors
