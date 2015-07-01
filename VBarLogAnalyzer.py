@@ -298,7 +298,7 @@ class Analyzer:
 					continue
 
 	def _find_vcontrol_path(self):
-		return '/Users/linus/vcontrol'
+#		return '/Users/linus/vcontrol'
 		if 'linux' in sys.platform:
 #			return "/tmp";
 			drives=subprocess.Popen('mount', shell=True, stdout=subprocess.PIPE)
