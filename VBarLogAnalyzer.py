@@ -53,15 +53,6 @@ class Analyzer:
 			self._conn.commit();
 
 		cur = self._conn.cursor()
-		cur.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='ui'")
-		rs = cur.fetchone()
-		if rs == None:
-			print "Creating database table ui";
-			cur = self._conn.cursor()
-			cur.execute("CREATE TABLE ui (id INTEGER PRIMARY KEY autoincrement, logid INTEGER, original_filename VARCHAR(255), date DATETIME, ampere NUMERIC(3,1), voltage NUMERIC(3,1), headspeed INTEGER, pwm INTEGER)");
-			self._conn.commit();
-
-		cur = self._conn.cursor()
 		cur.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='vbarlog'")
 		rs = cur.fetchone()
 		if rs == None:
@@ -209,6 +200,7 @@ class Analyzer:
 				error = False
 				firstLine = False
 				lastHour = ''
+				cur = self._db().cursor()
 				for line in lines:
 					if firstLine == False:
 						firstLine = True
@@ -236,7 +228,6 @@ class Analyzer:
 					sqlDate = date.strftime('%Y-%m-%d') + ' ' + cols[0]
 
 					if (lastHour == ''):
-						cur = self._db().cursor()
 						cur.execute('SELECT count(*) from vbarlog where model=? and date=?', [modelName, sqlDate])
 						rs = cur.fetchone()
 						if rs[0] != 0:
@@ -246,7 +237,7 @@ class Analyzer:
 					lastHour = hour
 					cur.execute('INSERT INTO vbarlog (original_filename, model, date, severity, message) VALUES (?,?,?,?,?)',
 					 	[vbarFile, modelName, sqlDate, int(cols[1]), cols[2]])
-					self._db().commit()
+				self._db().commit()
 
 				if error == True:
 					continue
@@ -278,8 +269,9 @@ class Analyzer:
 
 					cur.execute('INSERT INTO uilog (original_filename, model, date, ampere, voltage, usedcapacity, headspeed, pwm) VALUES (?,?,?,?,?,?,?,?)',
 					 	[uiFile, modelName, sqlDate, float(cols[1]), float(cols[2]), float(cols[3]), int(cols[4]), int(cols[5])])
-					self._db().commit()
-				
+				self._db().commit()
+		return
+
 	def _import_ui(self, logid, date, modelPath):
 		# First we need to find the file containing UI data for this flight
 		# It is not guaranteed to be there. 
