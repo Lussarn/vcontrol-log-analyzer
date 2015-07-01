@@ -11,3 +11,7 @@ More robust vbar control detection on windows.
 v2.2.0
 Added Graph
 Added remember window size
+
+v2.3.0
+Added ui data
+Added vbar log
