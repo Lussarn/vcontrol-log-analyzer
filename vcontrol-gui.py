@@ -5,11 +5,11 @@ import matplotlib
 matplotlib.use('WXAgg')
 
 from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg as FigureCanvas
-from matplotlib.backends.backend_wx import NavigationToolbar2Wx
+from matplotlib.backends.backend_wx import NavigationToolbar2Wx as NavigationToolbar
 from matplotlib.figure import Figure
 from matplotlib.ticker import MaxNLocator
 from matplotlib.ticker import FixedLocator
-
+from matplotlib.ticker import MultipleLocator, AutoMinorLocator
 
 import math
 import wx
@@ -150,7 +150,7 @@ class MainWindow(wx.Frame):
 		nb.AddPage(pageGrid, "Data view")
 
 		self.grid = wx.grid.Grid(pageGrid)
-		self.grid.CreateGrid(10, 10)
+		self.grid.CreateGrid(10, 12)
 
 		self.grid.ClipHorzGridLines(False)
 		self.grid.ClipVertGridLines(False)
@@ -172,8 +172,13 @@ class MainWindow(wx.Frame):
 		self.grid.SetColLabelValue(7, 'MinV')
 		self.grid.SetColLabelValue(8, 'MaxA')
 		self.grid.SetColLabelValue(9, 'IdleV')
+		self.grid.SetColLabelValue(10, 'VBLog')
+		self.grid.SetColLabelValue(11, 'UILog')
+
 
 		sizerPagerGrid.Add(self.grid, 1, wx.EXPAND)
+
+		self.grid.Bind(wx.grid.EVT_GRID_CELL_LEFT_DCLICK, self.OnGridDClick)
 
 		# Graph
 		pageGraph = wx.Panel(nb)
@@ -247,6 +252,20 @@ class MainWindow(wx.Frame):
 	def OnSelectModel(self, event):
 		self.modelSelected = self.models[event.GetSelection()]
 		self.populate_grid()
+
+	def OnGridDClick(self, event):
+		# Col 10 is VBarLog
+		col = event.GetCol()
+		row = event.GetRow()
+		if col < 10:
+			return
+		if self.grid.GetCellValue(row, col) != 'Yes':
+			return
+		logId = self.grid.GetCellValue(row, 0)
+		if (col == 11):
+			frame = UILogWindow(logId, self.analyzer)
+		if (col == 10):
+			frame = VBLogWindow(logId, self.analyzer)
 
 	def OnAbout(self,e):
 		dlg = wx.MessageDialog(self, "By Linus Larsson (linus.larsson@gmail.com)",  "       VBar control log analyzer", wx.OK)
@@ -326,18 +345,20 @@ class MainWindow(wx.Frame):
 			self.grid.SetCellValue(i,7, str(d['minv']))
 			self.grid.SetCellValue(i,8, str(d['maxa']))
 			self.grid.SetCellValue(i,9, str(d['idlev']))
+			self.grid.SetCellValue(i,10, 'Yes' if str(d['havevbarlog']) == '1' else '')
+			self.grid.SetCellValue(i,11, 'Yes' if str(d['haveuilog']) == '1' else '')
 
 			attr = wx.grid.GridCellAttr();
 			if d['session'] % 2 == 1:
 				if i % 2 == 1:
-					attr.SetBackgroundColour(wx.Colour(200,255,200))
+					attr.SetBackgroundColour(wx.Colour(31,119,180))
 				else:
-					attr.SetBackgroundColour(wx.Colour(140,200,140))
+					attr.SetBackgroundColour(wx.Colour(174,199,232))
 			else:
 				if i % 2 == 1:
-					attr.SetBackgroundColour(wx.Colour(200,200,255))
+					attr.SetBackgroundColour(wx.Colour(188,189,34))
 				else:
-					attr.SetBackgroundColour(wx.Colour(140,140,200))
+					attr.SetBackgroundColour(wx.Colour(219,219,141))
 
 			self.grid.SetRowAttr(i, attr)
 			i += 1
@@ -355,6 +376,7 @@ class MainWindow(wx.Frame):
 		# Graph
 		self.axes.clear()
 		self.figure.suptitle('Cycles / week', fontsize=14, fontweight='bold')
+		self.figure.set_facecolor('white')
 		self.axes = self.figure.add_subplot(111)
 		self.figure.tight_layout(rect=[0.03,0.1,0.85,0.95])
 		self.axes.xaxis.set_tick_params(width=0)
@@ -367,14 +389,24 @@ class MainWindow(wx.Frame):
 			data['data'].append({'week': '00     ', 'group': {}})
 		i = 0
 		ticks = []
-		allColors = list(reversed(
-			[
-			'#000080','#008000','#008080','#800000','#800080','#808000','#808080',
-			'#0000f0','#00f000','#00f0f0','#f00000','#f000f0','#f0f000','#f0f0f0'
-			'#0000b0','#00b000','#00b0b0','#b00000','#b000b0','#b0b000','#b0b0b0'
-			'#000040','#004000','#004040','#400000','#400040','#404000','#404040'
-			]
-			))
+
+		allColors = list(reversed([
+			(31, 119, 180),  (255, 127, 14), 
+			(44, 160, 44), (214, 39, 40), 
+			(148, 103, 189),  (140, 86, 75), 
+			(227, 119, 194), (127, 127, 127), 
+			(188, 189, 34), (23, 190, 207),
+			(174, 199, 232),(255, 187, 120),
+			(152, 223, 138), (255, 152, 150),
+			(197, 176, 213), (196, 156, 148),
+			(247, 182, 210), (199, 199, 199),
+			(219, 219, 141),  (158, 218, 229)
+			]))
+		for i in range(len(allColors)):
+			r, g, b = allColors[i]
+			allColors[i] = (r / 255., g / 255., b / 255.)
+
+
 		colors = allColors
 		modelColors = {}
 		for week in data['data']:
@@ -447,6 +479,263 @@ class MainWindow(wx.Frame):
 			base_path = os.path.abspath(".")
 
 		return os.path.join(base_path, relative_path)
+
+class VBLogWindow(wx.Frame):
+	def __init__(self, logId, analyzer):
+		data = analyzer.extract_log(logId)
+		wx.Frame.__init__(self, None, title='VBar Control flight analyzer 2.2.0 - Log Id ' + logId, size=(1200, 700))
+
+		textarea = wx.TextCtrl(self, -1,
+                                style=wx.TE_MULTILINE|wx.BORDER_SUNKEN|wx.TE_READONLY|
+                                wx.TE_RICH2)
+
+		for row in data:
+			line = row['date'] + ' (' + str(row['severity']) + ') ' + row['message'] + "\n"
+			textarea.AppendText(line)
+
+		self.Show()
+
+
+class UILogWindow(wx.Frame):
+	def __init__(self, logId, analyzer):
+		data = analyzer.extract_ui(logId)
+
+		wx.Frame.__init__(self, None, title='VBar Control flight analyzer 2.2.0 - Log Id ' + logId, size=(1200, 700))
+		self.figure = Figure()
+		self.axes = self.figure.add_subplot(111)
+		self.canvas = FigureCanvas(self, -1, self.figure)
+
+		sizerMainVert = wx.BoxSizer(wx.VERTICAL)
+
+		self.figure.set_facecolor('white')
+#		self.toolbar = NavigationToolbar(self.canvas)
+
+		sizerMainVert.Add(self.canvas, 1, wx.LEFT | wx.TOP | wx.GROW)
+		self.SetSizer(sizerMainVert)
+
+		# Grid lines
+		self.axes.xaxis.grid(True)
+		self.axes.xaxis.grid(b=True, which='major', color='0.65',linestyle='-')
+
+		# Graph size
+		self.figure.subplots_adjust(left=0.19, right=0.81)
+
+		# Subgraphs
+		host = self.axes
+		par1 = host.twinx()
+		par2 = host.twinx()
+		par3 = host.twinx()
+		par4 = host.twinx()
+		par5 = host.twinx()
+
+		par2.spines["left"].set_position(("axes", -0.08))
+		par2.yaxis.tick_left()
+		self.make_patch_spines_invisible(par2)
+		par2.yaxis.set_label_position('left');
+		par2.spines["left"].set_visible(True)
+		par2.spines["left"].set_color("#2CA02C")
+
+		par3.spines["right"].set_position(("axes", 1.08))
+		self.make_patch_spines_invisible(par3)
+		par3.spines["right"].set_visible(True)
+		par3.spines["right"].set_color("#D62728")
+
+		par4.spines["right"].set_position(("axes", 1.16))
+		self.make_patch_spines_invisible(par4)
+		par4.spines["right"].set_visible(True)
+		par4.spines["right"].set_color("#9467BD")
+
+		par5.spines["left"].set_position(("axes", -0.16))
+		par5.yaxis.tick_left()
+		self.make_patch_spines_invisible(par5)
+		par5.yaxis.set_label_position('left');
+		par5.spines["left"].set_visible(True)
+		par5.spines["left"].set_color("#8C564B")
+
+		host.spines['right'].set_color("#555555")
+		host.spines['left'].set_color("#555555")
+		host.spines['top'].set_color("#555555")
+		host.spines['bottom'].set_color("#555555")
+
+		# data
+		dataDate = []
+		dataRPM = []
+		dataCurrent = []
+		dataVoltage = []
+		dataPWM = []
+		dataUC = []
+		dataWatts = []
+		for row in data:
+			dataDate.append(row['sec'])
+			dataRPM.append(row['headspeed'])
+			dataVoltage.append(row['voltage'])
+			dataCurrent.append(row['current'])
+			dataPWM.append(row['pwm'])
+			dataUC.append(row['usedcapacity'])
+			dataWatts.append(row['voltage'] * row['current'])
+
+		p1, = host.plot(dataDate, dataVoltage, "#1F77B4", linewidth=0.5)
+		p2, = par1.plot(dataDate, dataRPM, "#FF7F0E",  linewidth=0.5)
+		p3, = par2.plot(dataDate, dataCurrent, "#2CA02C",  linewidth=0.5)
+		p4, = par3.plot(dataDate, dataPWM,  color="#D62728", linewidth=0.5)
+		p5, = par4.plot(dataDate, dataUC, color="#9467BD", linewidth=0.5)
+		p6, = par5.plot(dataDate, dataWatts, color="#8C564B", linewidth=0.5)
+
+		maxCurrent = max(dataCurrent)
+		maxRPM = max(dataRPM)
+		maxVoltage = max(dataVoltage)
+		maxWatts = max(dataWatts)
+
+		host.set_ylim(0, maxVoltage * 1.7)
+		par2.set_ylim(0,maxCurrent * 2)
+		par1.set_ylim(0,maxRPM * 1.5)
+		par5.set_ylim(0,maxWatts * 1.5)
+		par4.set_ylim(0)
+
+		# labels
+		host.set_xlabel("Duration (sec)", fontsize='x-small')
+		host.set_ylabel("Voltage", fontsize='x-small')
+		par1.set_ylabel("RPM", fontsize='x-small')
+		par2.set_ylabel("Current(A)", fontsize='x-small')
+		par3.set_ylabel("PWM", fontsize='x-small')
+		par4.set_ylabel("Used capacity (mAh)", fontsize='x-small')
+		par5.set_ylabel("Power (W)", fontsize='x-small')
+
+		# colors
+		host.xaxis.label.set_color('#555555')
+		host.yaxis.label.set_color(p1.get_color())
+		par1.yaxis.label.set_color(p2.get_color())
+		par2.yaxis.label.set_color(p3.get_color())
+		par3.yaxis.label.set_color(p4.get_color())
+		par4.yaxis.label.set_color(p5.get_color())
+		par5.yaxis.label.set_color(p6.get_color())
+
+		# minor locator
+		par2.yaxis.set_minor_locator(AutoMinorLocator())
+		host.yaxis.set_minor_locator(AutoMinorLocator())
+		host.xaxis.set_minor_locator(AutoMinorLocator())
+		par1.yaxis.set_minor_locator(AutoMinorLocator())
+		par5.yaxis.set_minor_locator(AutoMinorLocator())
+		par3.yaxis.set_minor_locator(AutoMinorLocator())
+		par4.yaxis.set_minor_locator(AutoMinorLocator())
+
+		# ticks
+		host.tick_params(axis='y', colors=p1.get_color(), which='major', direction='out', labelsize='x-small', size=4, width=1)
+		host.tick_params(axis='y', colors=p1.get_color(), which='minor', direction='out', labelsize='x-small', size=2, width=1)
+
+		par1.tick_params(axis='y', colors=p2.get_color(), which='major', direction='out', labelsize='x-small', size=4, width=1)
+		par1.tick_params(axis='y', colors=p2.get_color(), which='minor', direction='out', labelsize='x-small', size=2, width=1)
+
+		par2.tick_params(axis='y', colors=p3.get_color(), which='major', direction='out', labelsize='x-small', size=4, width=1)
+		par2.tick_params(axis='y', colors=p3.get_color(), which='minor', direction='out', labelsize='x-small', size=2, width=1)
+
+		par3.tick_params(axis='y', colors=p4.get_color(), which='major', direction='out', labelsize='x-small', size=4, width=1)
+		par3.tick_params(axis='y', colors=p4.get_color(), which='minor', direction='out', labelsize='x-small', size=2, width=1)
+
+		par4.tick_params(axis='y', colors=p5.get_color(), which='major', direction='out', labelsize='x-small', size=4, width=1)
+		par4.tick_params(axis='y', colors=p5.get_color(), which='minor', direction='out', labelsize='x-small', size=2, width=1)
+
+		par5.tick_params(axis='y', colors=p6.get_color(), which='major', direction='out', labelsize='x-small', size=4, width=1)
+		par5.tick_params(axis='y', colors=p6.get_color(), which='minor', direction='out', labelsize='x-small', size=2, width=1)
+
+		host.tick_params(axis='x', which='both', colors='#555555', top='off', size=2, width=1)
+		host.tick_params(axis='x', which='major', colors='#555555', size=4, width=1)
+
+		# Bottom panel
+		panelBottom = wx.Panel(self)
+		gs = wx.GridSizer(5, 7, 5, 5)
+		panelBottom.SetSizer(gs)
+
+		gs.Add(wx.StaticText(panelBottom), wx.EXPAND)
+		gs.Add(wx.StaticText(panelBottom, label='Voltage', style=wx.ALIGN_CENTER), 1, wx.EXPAND)
+		gs.Add(wx.StaticText(panelBottom, label='Current', style=wx.ALIGN_CENTER), 1, wx.EXPAND)
+		gs.Add(wx.StaticText(panelBottom, label='Power', style=wx.ALIGN_CENTER), 1, wx.EXPAND)
+		gs.Add(wx.StaticText(panelBottom, label='RPM', style=wx.ALIGN_CENTER), 1, wx.EXPAND)
+		gs.Add(wx.StaticText(panelBottom, label='PWM', style=wx.ALIGN_CENTER), 1, wx.EXPAND)
+		gs.Add(wx.StaticText(panelBottom, label='Capacity', style=wx.ALIGN_CENTER), 1, wx.EXPAND)
+
+#		gs.Add(wx.StaticText(panelBottom, label='Mouse:', style=wx.ALIGN_RIGHT), 1, wx.EXPAND)
+#		gs.Add(wx.StaticText(panelBottom), wx.EXPAND)
+#		gs.Add(wx.StaticText(panelBottom), wx.EXPAND)
+#		gs.Add(wx.StaticText(panelBottom), wx.EXPAND)
+#		gs.Add(wx.StaticText(panelBottom), wx.EXPAND)
+#		gs.Add(wx.StaticText(panelBottom), wx.EXPAND)
+#		gs.Add(wx.StaticText(panelBottom), wx.EXPAND)
+
+		gs.Add(wx.StaticText(panelBottom, label='Min:', style=wx.ALIGN_RIGHT), 1, wx.EXPAND)
+		m = min(dataVoltage)
+		m =  "{0:.1f}".format(round(m,1))
+		gs.Add(wx.StaticText(panelBottom, label=str(m), style=wx.ALIGN_CENTER), 1, wx.EXPAND)
+		m = min(dataCurrent)
+		m =  "{0:.1f}".format(round(m,1))
+		gs.Add(wx.StaticText(panelBottom, label=str(m), style=wx.ALIGN_CENTER), 1, wx.EXPAND)
+		m = min(dataWatts)
+		m = int(m)
+		gs.Add(wx.StaticText(panelBottom, label=str(m), style=wx.ALIGN_CENTER), 1, wx.EXPAND)
+		m = min(dataRPM)
+		m = int(m)
+		gs.Add(wx.StaticText(panelBottom, label=str(m), style=wx.ALIGN_CENTER), 1, wx.EXPAND)
+		m = min(dataPWM)
+		m = int(m)
+		gs.Add(wx.StaticText(panelBottom, label=str(m), style=wx.ALIGN_CENTER), 1, wx.EXPAND)
+		m = min(dataUC)
+		m = int(m)
+		gs.Add(wx.StaticText(panelBottom, label=str(m), style=wx.ALIGN_CENTER), 1, wx.EXPAND)
+
+		gs.Add(wx.StaticText(panelBottom, label='Max:', style=wx.ALIGN_RIGHT), 1, wx.EXPAND)
+		m = max(dataVoltage)
+		m =  "{0:.1f}".format(round(m,1))
+		gs.Add(wx.StaticText(panelBottom, label=str(m), style=wx.ALIGN_CENTER), 1, wx.EXPAND)
+		m = max(dataCurrent)
+		m =  "{0:.1f}".format(round(m,1))
+		gs.Add(wx.StaticText(panelBottom, label=str(m), style=wx.ALIGN_CENTER), 1, wx.EXPAND)
+		m = max(dataWatts)
+		m = int(m)
+		gs.Add(wx.StaticText(panelBottom, label=str(m), style=wx.ALIGN_CENTER), 1, wx.EXPAND)
+		m = max(dataRPM)
+		m = int(m)
+		gs.Add(wx.StaticText(panelBottom, label=str(m), style=wx.ALIGN_CENTER), 1, wx.EXPAND)
+		m = max(dataPWM)
+		m = int(m)
+		gs.Add(wx.StaticText(panelBottom, label=str(m), style=wx.ALIGN_CENTER), 1, wx.EXPAND)
+		m = max(dataUC)
+		m = int(m)
+		gs.Add(wx.StaticText(panelBottom, label=str(m), style=wx.ALIGN_CENTER), 1, wx.EXPAND)
+
+		gs.Add(wx.StaticText(panelBottom, label='Average:', style=wx.ALIGN_RIGHT), 1, wx.EXPAND)
+		avg = reduce(lambda x, y: x + y, dataVoltage) / len(dataVoltage)
+		avg =  "{0:.1f}".format(round(avg,1))
+		gs.Add(wx.StaticText(panelBottom, label=str(avg), style=wx.ALIGN_CENTER), 1, wx.EXPAND)
+		avg = reduce(lambda x, y: x + y, dataCurrent) / len(dataCurrent)
+		avg =  "{0:.1f}".format(round(avg,1))
+		gs.Add(wx.StaticText(panelBottom, label=str(avg), style=wx.ALIGN_CENTER), 1, wx.EXPAND)
+		avg = reduce(lambda x, y: x + y, dataWatts) / len(dataWatts)
+		avg =  int(avg)
+		gs.Add(wx.StaticText(panelBottom, label=str(avg), style=wx.ALIGN_CENTER), 1, wx.EXPAND)
+		avg = reduce(lambda x, y: x + y, dataRPM) / len(dataRPM)
+		avg = int(avg)
+		gs.Add(wx.StaticText(panelBottom, label=str(avg), style=wx.ALIGN_CENTER), 1, wx.EXPAND)
+		avg = reduce(lambda x, y: x + y, dataPWM) / len(dataPWM)
+		avg = int(avg)
+		gs.Add(wx.StaticText(panelBottom, label=str(avg), style=wx.ALIGN_CENTER), 1, wx.EXPAND)
+		avg = (max(dataUC) - min(dataUC)) / max(dataDate) * 60
+		avg =  int(avg)
+		gs.Add(wx.StaticText(panelBottom, label=str(avg) + '/min', style=wx.ALIGN_CENTER), 1, wx.EXPAND)
+
+		sizerMainVert.Add(panelBottom, 0, wx.LEFT | wx.TOP)
+
+		self.SetBackgroundColour('white')
+
+
+		self.Show()
+
+	def make_patch_spines_invisible(self, ax):
+		ax.set_frame_on(True)
+		ax.patch.set_visible(False)
+		ax.spines['left'].set_visible(False)
+		for sp in ax.spines.itervalues():
+			sp.set_visible(False)
+
 
 app = wx.App(False)
 app.SetAppName("VBar control log analyzer")

@@ -52,6 +52,40 @@ class Analyzer:
 			cur.execute("CREATE TABLE variable (name VARCHAR(255) PRIMARY KEY, value TEXT)");
 			self._conn.commit();
 
+		cur = self._conn.cursor()
+		cur.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='ui'")
+		rs = cur.fetchone()
+		if rs == None:
+			print "Creating database table ui";
+			cur = self._conn.cursor()
+			cur.execute("CREATE TABLE ui (id INTEGER PRIMARY KEY autoincrement, logid INTEGER, original_filename VARCHAR(255), date DATETIME, ampere NUMERIC(3,1), voltage NUMERIC(3,1), headspeed INTEGER, pwm INTEGER)");
+			self._conn.commit();
+
+		cur = self._conn.cursor()
+		cur.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='vbarlog'")
+		rs = cur.fetchone()
+		if rs == None:
+			print "Creating database table vbarlog";
+			cur = self._conn.cursor()
+			cur.execute("CREATE TABLE vbarlog (id INTEGER PRIMARY KEY autoincrement, logid INTEGER, original_filename VARCHAR(255), model VARCHAR(255), date DATETIME, severity INTEGER, message VARCHAR(255))");
+			self._conn.commit();
+			cur = self._conn.cursor()
+			cur.execute("CREATE INDEX idx_vbar_logid ON vbarlog (logid)");
+			self._conn.commit();
+
+
+		cur = self._conn.cursor()
+		cur.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='uilog'")
+		rs = cur.fetchone()
+		if rs == None:
+			print "Creating database table uilog";
+			cur = self._conn.cursor()
+			cur.execute("CREATE TABLE uilog (id INTEGER PRIMARY KEY autoincrement, logid INTEGER, original_filename VARCHAR(255), model VARCHAR(255), date DATETIME, ampere NUMERIC(3,1), voltage NUMERIC(3,1), usedcapacity NUMERIC(3,1), headspeed INTEGER, pwm INTEGER)");
+			self._conn.commit();
+			cur = self._conn.cursor()
+			cur.execute("CREATE INDEX idx_ui_logid ON uilog (logid)");
+			self._conn.commit();
+
 		return self._conn
 
 	def get_battery_id(self, name):
@@ -90,8 +124,10 @@ class Analyzer:
 		return gear
 
 	def import_data(self):
-		base = self._find_vcontrol_path()
 
+		self._import_model_logs();
+
+		base = self._find_vcontrol_path()
 		batteryPath = os.path.join(base, 'battery')
 		if not os.path.isdir(batteryPath):
 			self.error = "VControl path not found, mounted?"
@@ -133,10 +169,136 @@ class Analyzer:
 					cur = self._db().cursor()
 					cur.execute('INSERT INTO batterylog (date, batteryid, modelid, duration, capacity, used, minvoltage, maxampere, uid) VALUES (?,?,?,?,?,?,?,?,?)',
 					 	[date, batteryid, modelid, duration, capacity, used, minvoltage, maxampere, uid])
+					logid = cur.lastrowid
 					self._db().commit()
+
+					# Lets see if we got a vbar log for this flight
+
+					cur = self._db().cursor()
+					cur.execute("SELECT original_filename FROM vbarlog vbl WHERE model=? AND logid IS NULL AND (date = ? AND message = 'VBar Logfile End') OR (date <= ? AND (SELECT original_filename FROM vbarlog WHERE id=vbl.id + 1 AND date > ?) = vbl.original_filename) ORDER BY date DESC LIMIT 1",
+						[model, date, date, date])
+					rs = cur.fetchone()
+					if rs != None:
+						vbarFile = rs[0]
+						cur = self._db().cursor()
+						cur.execute('UPDATE vbarlog SET logid = ? WHERE original_filename = ?',
+						 	[logid, vbarFile])
+						self._db().commit()
+						
+						uiFile = vbarFile.replace('_vbar.log', '_ui.csv')
+						cur = self._db().cursor()
+						cur.execute('UPDATE uilog SET logid = ? WHERE original_filename = ?',
+						 	[logid, uiFile])
+						self._db().commit()
+
 		return imported
 
+	def _import_model_logs(self):
+		base = self._find_vcontrol_path()
+		logPath = os.path.join(base, 'log')
+		modelDirs = [ os.path.join(logPath,f) for f in os.listdir(logPath) if os.path.isdir(os.path.join(logPath,f)) ]
+		for modelPath in modelDirs:
+			# Open all vbar files and check if they need importing
+			vbarFiles = [ f for f in os.listdir(modelPath) if os.path.isfile(os.path.join(modelPath, f))  and '_vbar.log' in f ]
+			for vbarFile in vbarFiles:
+				# import the vbar file
+				with open(os.path.join(modelPath, vbarFile)) as f:
+					lines = f.readlines()
+				lines = [x.strip() for x in lines]
+
+				error = False
+				firstLine = False
+				lastHour = ''
+				for line in lines:
+					if firstLine == False:
+						firstLine = True
+						cols = line.split(' -- ')
+						if len(cols) != 4 and cols[0] != 'VBar Start':
+							error = True
+							break
+						modelName = unicode(cols[1], errors='ignore')
+						startdate = date = datetime.datetime.strptime(cols[2],'%d.%m.%Y')
+						continue
+
+					if ('VBar Logfile End' in line):
+						cols = line.split(' -- ')
+						sqlDate = datetime.datetime.strptime(cols[1] + ' ' + cols[2],'%d.%m.%Y %H:%M:%S').strftime('%Y-%m-%d %H:%M:%S')
+						cur.execute('INSERT INTO vbarlog (original_filename, model, date, severity, message) VALUES (?,?,?,?,?)',
+						 	[vbarFile, modelName, sqlDate, 1, 'VBar Logfile End'])
+						self._db().commit()
+						break
+
+					cols = line.split(';')
+					hour = cols[0][:2]
+					# Rollover on date
+					if (lastHour == '23' and hour == '00'):
+						date = date + datetime.timedelta(days = 1)
+					sqlDate = date.strftime('%Y-%m-%d') + ' ' + cols[0]
+
+					if (lastHour == ''):
+						cur = self._db().cursor()
+						cur.execute('SELECT count(*) from vbarlog where model=? and date=?', [modelName, sqlDate])
+						rs = cur.fetchone()
+						if rs[0] != 0:
+							error = True
+							break
+
+					lastHour = hour
+					cur.execute('INSERT INTO vbarlog (original_filename, model, date, severity, message) VALUES (?,?,?,?,?)',
+					 	[vbarFile, modelName, sqlDate, int(cols[1]), cols[2]])
+					self._db().commit()
+
+				if error == True:
+					continue
+
+				# See if we have an ui file for this flight
+				uiFile = vbarFile.replace('_vbar.log', '_ui.csv')
+				if not os.path.isfile(os.path.join(modelPath, uiFile)):
+					continue
+
+				with open(os.path.join(modelPath, uiFile)) as f:
+					lines = f.readlines()
+				lines = [x.strip() for x in lines]
+	
+				# remove first line
+				lines.pop(0)
+
+				date = startdate
+
+				for line in lines:
+					cols = line.split(';')
+					if len(cols) != 6:
+						continue
+		
+					hour = cols[0][:2]
+					# Rollover on date
+					if (lastHour == '23' and hour == '00'):
+						date = date + datetime.timedelta(days = 1)
+					sqlDate = date.strftime('%Y-%m-%d') + ' ' + cols[0]
+
+					cur.execute('INSERT INTO uilog (original_filename, model, date, ampere, voltage, usedcapacity, headspeed, pwm) VALUES (?,?,?,?,?,?,?,?)',
+					 	[uiFile, modelName, sqlDate, float(cols[1]), float(cols[2]), float(cols[3]), int(cols[4]), int(cols[5])])
+					self._db().commit()
+				
+	def _import_ui(self, logid, date, modelPath):
+		# First we need to find the file containing UI data for this flight
+		# It is not guaranteed to be there. 
+		# We do this by comparing the date with the dates in the _ui files
+		uiFilenames = [ os.path.join(modelPath,f) for f in os.listdir(modelPath) if os.path.isfile(os.path.join(batteryPath,f)) and "_ui" in f ]
+		for filename in uiFilenames:
+			# read lines
+			with open(filename) as f:
+				lines = f.readlines()
+			lines = [x.strip() for x in lines] 
+			for line in lines:
+				cols = line.split(';')
+				if len(cols) < 6:
+					continue
+				if cols[0] == 'Date':
+					continue
+
 	def _find_vcontrol_path(self):
+		return '/Users/linus/vcontrol'
 		if 'linux' in sys.platform:
 #			return "/tmp";
 			drives=subprocess.Popen('mount', shell=True, stdout=subprocess.PIPE)
@@ -179,7 +341,9 @@ class Analyzer:
 
 	def extract(self, batteryid=None, modelid=None, start=None, end=None):
 		sql = "\
-			SELECT l.id, b.name as batteryname, m.name as modelname, l.date, l.duration, l.capacity, l.used, l.minvoltage, l.maxampere, l.uid \
+			SELECT l.id, b.name as batteryname, m.name as modelname, l.date, l.duration, l.capacity, l.used, l.minvoltage, l.maxampere, l.uid, \
+			(select count(*) > 1 from vbarlog vbl WHERE l.id=vbl.logid) as havevbarlog, \
+			(select count(*) > 1 from uilog ul WHERE l.id=ul.logid) as haveuilog \
 			FROM batterylog l \
 			LEFT JOIN battery b on b.id=l.batteryid \
 			LEFT JOIN model m on m.id=l.modelid \
@@ -215,7 +379,7 @@ class Analyzer:
 			duration = "{0:02d}:{1:02d}".format(int(row[4] / 60), int(row[4] % 60))
 			flighttime += row[4]
 			used = str(row[6]) + ' (' + str(int(float(row[6]) / row[5] * 100)) + '%)'
-			data.append({'id': row[0], 'date': row[3], 'battery': row[1], 'model': row[2], 'duration': duration, 'capacity': row[5], 'used': used, 'minv': row[7], 'maxa': row[8], 'idlev': row[9], 'session': session})
+			data.append({'id': row[0], 'date': row[3], 'battery': row[1], 'model': row[2], 'duration': duration, 'capacity': row[5], 'used': used, 'minv': row[7], 'maxa': row[8], 'idlev': row[9], 'session': session, 'havevbarlog': row[10], 'haveuilog': row[11] })
 			olddate = date
 
 		capacityused = round(float(capacityused) / 1000, 2)
@@ -273,3 +437,60 @@ class Analyzer:
 
 		data['data'] = out
 		return data
+
+	def extract_ui(self, logId):
+		sql = "\
+			SELECT  model, date, ampere, voltage, usedcapacity, headspeed, pwm FROM uilog where logid=" + str(logId)
+
+		cur = self._db().cursor()
+		out = []
+		clipStart = False
+		clipEnd = False
+		i = 0
+		lastNotZero = 0
+		for row in cur.execute(sql):
+			if clipStart == False and int(row[5]) == 0:
+				continue
+			if clipStart == False:
+				clipStart = row[1]
+
+			out.append({
+				'model': row[0],
+				'current': float(row[2]),
+				'voltage': float(row[3]),
+				'usedcapacity': float(row[4]),
+				'headspeed': int(row[5]),
+				'pwm': int(row[6])
+			})
+			if int(row[5]) != 0:
+				lastNotZero = i
+				clipEnd = row[1]
+			i+=1
+
+		out = out[0:lastNotZero]
+
+		# Now we shuold evenly distribute end over the
+		# seconds in clipStart and clipEnd
+		# We need to know the number of seconds beetween clipStart and clipEnd
+		start =time.mktime(time.strptime(clipStart, '%Y-%m-%d %H:%M:%S'))
+		end =time.mktime(time.strptime(clipEnd, '%Y-%m-%d %H:%M:%S'))
+		dur = end - start
+
+		for i,row in enumerate(out):
+			out[i]['sec'] = (float(i) / len(out)) * dur
+
+		return out
+
+	def extract_log(self, logId):
+		sql = "\
+			SELECT  model, date, severity, message FROM vbarlog where logid=" + str(logId)
+		cur = self._db().cursor()
+		out = []
+		for row in cur.execute(sql):
+			out.append({
+				'model': row[0],
+				'date': row[1],
+				'severity': int(row[2]),
+				'message': row[3]
+			})
+		return out
