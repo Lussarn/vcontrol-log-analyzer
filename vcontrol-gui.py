@@ -4,12 +4,15 @@ from numpy import arange, sin, pi, arange
 import matplotlib
 matplotlib.use('WXAgg')
 
+import matplotlib.pyplot as plt
+
 from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg as FigureCanvas
 from matplotlib.backends.backend_wx import NavigationToolbar2Wx as NavigationToolbar
 from matplotlib.figure import Figure
 from matplotlib.ticker import MaxNLocator
 from matplotlib.ticker import FixedLocator
 from matplotlib.ticker import MultipleLocator, AutoMinorLocator
+from matplotlib.patches import Rectangle
 
 import math
 import wx
@@ -481,6 +484,21 @@ class MainWindow(wx.Frame):
 
 		return os.path.join(base_path, relative_path)
 
+class LineBuilder:
+	def __init__(self, line):
+		self.line = line
+		self.xs = list(line.get_xdata())
+		self.ys = list(line.get_ydata())
+		self.cid = line.figure.canvas.mpl_connect('button_press_event', self)
+
+	def __call__(self, event):
+		print 'click', event
+		if event.inaxes!=self.line.axes: return
+		self.xs.append(event.xdata)
+		self.ys.append(event.ydata)
+		self.line.set_data(self.xs, self.ys)
+		self.line.figure.canvas.draw()
+
 class VBLogWindow(wx.Frame):
 	def __init__(self, logId, analyzer):
 		data = analyzer.extract_log(logId)
@@ -499,6 +517,8 @@ class VBLogWindow(wx.Frame):
 
 class UILogWindow(wx.Frame):
 	def __init__(self, logId, analyzer):
+		self.background = None
+		self.selectStart = None
 		data = analyzer.extract_ui(logId)
 
 		wx.Frame.__init__(self, None, title='VBar Control flight analyzer v2.3.0 - Log Id ' + logId, size=(1200, 700))
@@ -509,10 +529,12 @@ class UILogWindow(wx.Frame):
 		sizerMainVert = wx.BoxSizer(wx.VERTICAL)
 
 		self.figure.set_facecolor('white')
-#		self.toolbar = NavigationToolbar(self.canvas)
 
+#		sizerMainVert.Add((0,10))
+#		sizerMainVert.Add(wx.StaticText(self, label='Goblin 700 - 12S 5000mAh #1 - 2013-10-06 13:23', size=15, style=wx.ALIGN_CENTER), 0, wx.EXPAND)
 		sizerMainVert.Add(self.canvas, 1, wx.LEFT | wx.TOP | wx.GROW)
 		self.SetSizer(sizerMainVert)
+
 
 		# Grid lines
 		self.axes.xaxis.grid(True)
@@ -522,12 +544,12 @@ class UILogWindow(wx.Frame):
 		self.figure.subplots_adjust(left=0.19, right=0.81)
 
 		# Subgraphs
-		host = self.axes
-		par1 = host.twinx()
-		par2 = host.twinx()
-		par3 = host.twinx()
-		par4 = host.twinx()
-		par5 = host.twinx()
+		self.host = self.axes
+		par1 = self.host.twinx()
+		par2 = self.host.twinx()
+		par3 = self.host.twinx()
+		par4 = self.host.twinx()
+		self.par5 = self.host.twinx()
 
 		par2.spines["left"].set_position(("axes", -0.08))
 		par2.yaxis.tick_left()
@@ -546,17 +568,17 @@ class UILogWindow(wx.Frame):
 		par4.spines["right"].set_visible(True)
 		par4.spines["right"].set_color("#9467BD")
 
-		par5.spines["left"].set_position(("axes", -0.16))
-		par5.yaxis.tick_left()
-		self.make_patch_spines_invisible(par5)
-		par5.yaxis.set_label_position('left');
-		par5.spines["left"].set_visible(True)
-		par5.spines["left"].set_color("#8C564B")
+		self.par5.spines["left"].set_position(("axes", -0.16))
+		self.par5.yaxis.tick_left()
+		self.make_patch_spines_invisible(self.par5)
+		self.par5.yaxis.set_label_position('left');
+		self.par5.spines["left"].set_visible(True)
+		self.par5.spines["left"].set_color("#8C564B")
 
-		host.spines['right'].set_color("#555555")
-		host.spines['left'].set_color("#555555")
-		host.spines['top'].set_color("#555555")
-		host.spines['bottom'].set_color("#555555")
+		self.host.spines['right'].set_color("#555555")
+		self.host.spines['left'].set_color("#555555")
+		self.host.spines['top'].set_color("#555555")
+		self.host.spines['bottom'].set_color("#555555")
 
 		# data
 		dataDate = []
@@ -566,7 +588,9 @@ class UILogWindow(wx.Frame):
 		dataPWM = []
 		dataUC = []
 		dataWatts = []
+		self.myXLim = 0
 		for row in data:
+			self.myXLim = row['sec']
 			dataDate.append(row['sec'])
 			dataRPM.append(row['headspeed'])
 			dataVoltage.append(row['voltage'])
@@ -575,72 +599,73 @@ class UILogWindow(wx.Frame):
 			dataUC.append(row['usedcapacity'])
 			dataWatts.append(row['voltage'] * row['current'])
 
-		p1, = host.plot(dataDate, dataVoltage, "#1F77B4", linewidth=0.5)
-		p2, = par1.plot(dataDate, dataRPM, "#FF7F0E",  linewidth=0.5)
-		p3, = par2.plot(dataDate, dataCurrent, "#2CA02C",  linewidth=0.5)
-		p4, = par3.plot(dataDate, dataPWM,  color="#D62728", linewidth=0.5)
-		p5, = par4.plot(dataDate, dataUC, color="#9467BD", linewidth=0.5)
-		p6, = par5.plot(dataDate, dataWatts, color="#8C564B", linewidth=0.5)
+		self.p1, = self.host.plot(dataDate, dataVoltage, "#1F77B4", linewidth=0.5)
+		self.p2, = par1.plot(dataDate, dataRPM, "#FF7F0E",  linewidth=0.5)
+		self.p3, = par2.plot(dataDate, dataCurrent, "#2CA02C",  linewidth=0.5)
+		self.p4, = par3.plot(dataDate, dataPWM,  color="#D62728", linewidth=0.5)
+		self.p5, = par4.plot(dataDate, dataUC, color="#9467BD", linewidth=0.5)
+		self.p6, = self.par5.plot(dataDate, dataWatts, color="#8C564B", linewidth=0.5)
 
 		maxCurrent = max(dataCurrent)
 		maxRPM = max(dataRPM)
 		maxVoltage = max(dataVoltage)
 		maxWatts = max(dataWatts)
 
-		host.set_ylim(0, maxVoltage * 1.7)
+		self.host.set_ylim(0, maxVoltage * 1.7)
 		par2.set_ylim(0,maxCurrent * 2)
 		par1.set_ylim(0,maxRPM * 1.5)
-		par5.set_ylim(0,maxWatts * 1.5)
+		self.par5.set_ylim(0,maxWatts * 1.5)
 		par4.set_ylim(0)
 
 		# labels
-		host.set_xlabel("Duration (sec)", fontsize='x-small')
-		host.set_ylabel("Voltage", fontsize='x-small')
+		self.host.set_xlabel("Duration (sec)", fontsize='x-small')
+		self.host.set_ylabel("Voltage", fontsize='x-small')
 		par1.set_ylabel("RPM", fontsize='x-small')
 		par2.set_ylabel("Current(A)", fontsize='x-small')
 		par3.set_ylabel("PWM", fontsize='x-small')
 		par4.set_ylabel("Used capacity (mAh)", fontsize='x-small')
-		par5.set_ylabel("Power (W)", fontsize='x-small')
+		self.par5.set_ylabel("Power (W)", fontsize='x-small')
 
 		# colors
-		host.xaxis.label.set_color('#555555')
-		host.yaxis.label.set_color(p1.get_color())
-		par1.yaxis.label.set_color(p2.get_color())
-		par2.yaxis.label.set_color(p3.get_color())
-		par3.yaxis.label.set_color(p4.get_color())
-		par4.yaxis.label.set_color(p5.get_color())
-		par5.yaxis.label.set_color(p6.get_color())
+		self.host.xaxis.label.set_color('#555555')
+		self.host.yaxis.label.set_color(self.p1.get_color())
+		par1.yaxis.label.set_color(self.p2.get_color())
+		par2.yaxis.label.set_color(self.p3.get_color())
+		par3.yaxis.label.set_color(self.p4.get_color())
+		par4.yaxis.label.set_color(self.p5.get_color())
+		self.par5.yaxis.label.set_color(self.p6.get_color())
 
 		# minor locator
 		par2.yaxis.set_minor_locator(AutoMinorLocator())
-		host.yaxis.set_minor_locator(AutoMinorLocator())
-		host.xaxis.set_minor_locator(AutoMinorLocator())
+		self.host.yaxis.set_minor_locator(AutoMinorLocator())
+		self.host.xaxis.set_minor_locator(AutoMinorLocator())
 		par1.yaxis.set_minor_locator(AutoMinorLocator())
-		par5.yaxis.set_minor_locator(AutoMinorLocator())
+		self.par5.yaxis.set_minor_locator(AutoMinorLocator())
 		par3.yaxis.set_minor_locator(AutoMinorLocator())
 		par4.yaxis.set_minor_locator(AutoMinorLocator())
 
 		# ticks
-		host.tick_params(axis='y', colors=p1.get_color(), which='major', direction='out', labelsize='x-small', size=4, width=1)
-		host.tick_params(axis='y', colors=p1.get_color(), which='minor', direction='out', labelsize='x-small', size=2, width=1)
+		self.host.tick_params(axis='y', colors=self.p1.get_color(), which='major', direction='out', labelsize='x-small', size=4, width=1)
+		self.host.tick_params(axis='y', colors=self.p1.get_color(), which='minor', direction='out', labelsize='x-small', size=2, width=1)
 
-		par1.tick_params(axis='y', colors=p2.get_color(), which='major', direction='out', labelsize='x-small', size=4, width=1)
-		par1.tick_params(axis='y', colors=p2.get_color(), which='minor', direction='out', labelsize='x-small', size=2, width=1)
+		par1.tick_params(axis='y', colors=self.p2.get_color(), which='major', direction='out', labelsize='x-small', size=4, width=1)
+		par1.tick_params(axis='y', colors=self.p2.get_color(), which='minor', direction='out', labelsize='x-small', size=2, width=1)
 
-		par2.tick_params(axis='y', colors=p3.get_color(), which='major', direction='out', labelsize='x-small', size=4, width=1)
-		par2.tick_params(axis='y', colors=p3.get_color(), which='minor', direction='out', labelsize='x-small', size=2, width=1)
+		par2.tick_params(axis='y', colors=self.p3.get_color(), which='major', direction='out', labelsize='x-small', size=4, width=1)
+		par2.tick_params(axis='y', colors=self.p3.get_color(), which='minor', direction='out', labelsize='x-small', size=2, width=1)
 
-		par3.tick_params(axis='y', colors=p4.get_color(), which='major', direction='out', labelsize='x-small', size=4, width=1)
-		par3.tick_params(axis='y', colors=p4.get_color(), which='minor', direction='out', labelsize='x-small', size=2, width=1)
+		par3.tick_params(axis='y', colors=self.p4.get_color(), which='major', direction='out', labelsize='x-small', size=4, width=1)
+		par3.tick_params(axis='y', colors=self.p4.get_color(), which='minor', direction='out', labelsize='x-small', size=2, width=1)
 
-		par4.tick_params(axis='y', colors=p5.get_color(), which='major', direction='out', labelsize='x-small', size=4, width=1)
-		par4.tick_params(axis='y', colors=p5.get_color(), which='minor', direction='out', labelsize='x-small', size=2, width=1)
+		par4.tick_params(axis='y', colors=self.p5.get_color(), which='major', direction='out', labelsize='x-small', size=4, width=1)
+		par4.tick_params(axis='y', colors=self.p5.get_color(), which='minor', direction='out', labelsize='x-small', size=2, width=1)
 
-		par5.tick_params(axis='y', colors=p6.get_color(), which='major', direction='out', labelsize='x-small', size=4, width=1)
-		par5.tick_params(axis='y', colors=p6.get_color(), which='minor', direction='out', labelsize='x-small', size=2, width=1)
+		self.par5.tick_params(axis='y', colors=self.p6.get_color(), which='major', direction='out', labelsize='x-small', size=4, width=1)
+		self.par5.tick_params(axis='y', colors=self.p6.get_color(), which='minor', direction='out', labelsize='x-small', size=2, width=1)
 
-		host.tick_params(axis='x', which='both', colors='#555555', top='off', size=2, width=1)
-		host.tick_params(axis='x', which='major', colors='#555555', size=4, width=1)
+		self.host.tick_params(axis='x', which='both', colors='#555555', top='off', size=2, width=1)
+		self.host.tick_params(axis='x', which='major', colors='#555555', size=4, width=1)
+
 
 		# Bottom panel
 		panelBottom = wx.Panel(self)
@@ -655,78 +680,92 @@ class UILogWindow(wx.Frame):
 		gs.Add(wx.StaticText(panelBottom, label='PWM', style=wx.ALIGN_CENTER), 1, wx.EXPAND)
 		gs.Add(wx.StaticText(panelBottom, label='Capacity', style=wx.ALIGN_CENTER), 1, wx.EXPAND)
 
-#		gs.Add(wx.StaticText(panelBottom, label='Mouse:', style=wx.ALIGN_RIGHT), 1, wx.EXPAND)
-#		gs.Add(wx.StaticText(panelBottom), wx.EXPAND)
-#		gs.Add(wx.StaticText(panelBottom), wx.EXPAND)
-#		gs.Add(wx.StaticText(panelBottom), wx.EXPAND)
-#		gs.Add(wx.StaticText(panelBottom), wx.EXPAND)
-#		gs.Add(wx.StaticText(panelBottom), wx.EXPAND)
-#		gs.Add(wx.StaticText(panelBottom), wx.EXPAND)
+		gs.Add(wx.StaticText(panelBottom, label='Mouse:', style=wx.ALIGN_RIGHT), 1, wx.EXPAND)
+		self.m1 = wx.StaticText(panelBottom, label="0", style=wx.ALIGN_CENTER | wx.ST_NO_AUTORESIZE)
+		gs.Add(self.m1, 1, wx.EXPAND)
+		self.m2 = wx.StaticText(panelBottom, label="0", style=wx.ALIGN_CENTER | wx.ST_NO_AUTORESIZE)
+		gs.Add(self.m2, 1, wx.EXPAND)
+		self.m3 = wx.StaticText(panelBottom, label="0", style=wx.ALIGN_CENTER | wx.ST_NO_AUTORESIZE)
+		gs.Add(self.m3, 1, wx.EXPAND)
+		self.m4 = wx.StaticText(panelBottom, label="0", style=wx.ALIGN_CENTER | wx.ST_NO_AUTORESIZE)
+		gs.Add(self.m4, 1, wx.EXPAND)
+		self.m5 = wx.StaticText(panelBottom, label="0", style=wx.ALIGN_CENTER | wx.ST_NO_AUTORESIZE)
+		gs.Add(self.m5, 1, wx.EXPAND)
+		self.m6 = wx.StaticText(panelBottom, label="0", style=wx.ALIGN_CENTER | wx.ST_NO_AUTORESIZE)
+		gs.Add(self.m6, 1, wx.EXPAND)
 
 		gs.Add(wx.StaticText(panelBottom, label='Min:', style=wx.ALIGN_RIGHT), 1, wx.EXPAND)
 		m = min(dataVoltage)
 		m =  "{0:.1f}".format(round(m,1))
-		gs.Add(wx.StaticText(panelBottom, label=str(m), style=wx.ALIGN_CENTER), 1, wx.EXPAND)
+		gs.Add(wx.StaticText(panelBottom, label=str(m), style=wx.ALIGN_CENTER | wx.ST_NO_AUTORESIZE), 1, wx.EXPAND)
 		m = min(dataCurrent)
 		m =  "{0:.1f}".format(round(m,1))
-		gs.Add(wx.StaticText(panelBottom, label=str(m), style=wx.ALIGN_CENTER), 1, wx.EXPAND)
+		gs.Add(wx.StaticText(panelBottom, label=str(m), style=wx.ALIGN_CENTER | wx.ST_NO_AUTORESIZE), 1, wx.EXPAND)
 		m = min(dataWatts)
 		m = int(m)
-		gs.Add(wx.StaticText(panelBottom, label=str(m), style=wx.ALIGN_CENTER), 1, wx.EXPAND)
+		gs.Add(wx.StaticText(panelBottom, label=str(m), style=wx.ALIGN_CENTER | wx.ST_NO_AUTORESIZE), 1, wx.EXPAND)
 		m = min(dataRPM)
 		m = int(m)
-		gs.Add(wx.StaticText(panelBottom, label=str(m), style=wx.ALIGN_CENTER), 1, wx.EXPAND)
+		gs.Add(wx.StaticText(panelBottom, label=str(m), style=wx.ALIGN_CENTER | wx.ST_NO_AUTORESIZE), 1, wx.EXPAND)
 		m = min(dataPWM)
 		m = int(m)
-		gs.Add(wx.StaticText(panelBottom, label=str(m), style=wx.ALIGN_CENTER), 1, wx.EXPAND)
+		gs.Add(wx.StaticText(panelBottom, label=str(m), style=wx.ALIGN_CENTER | wx.ST_NO_AUTORESIZE), 1, wx.EXPAND)
 		m = min(dataUC)
 		m = int(m)
-		gs.Add(wx.StaticText(panelBottom, label=str(m), style=wx.ALIGN_CENTER), 1, wx.EXPAND)
+		gs.Add(wx.StaticText(panelBottom, label=str(m), style=wx.ALIGN_CENTER | wx.ST_NO_AUTORESIZE), 1, wx.EXPAND)
 
 		gs.Add(wx.StaticText(panelBottom, label='Max:', style=wx.ALIGN_RIGHT), 1, wx.EXPAND)
 		m = max(dataVoltage)
 		m =  "{0:.1f}".format(round(m,1))
-		gs.Add(wx.StaticText(panelBottom, label=str(m), style=wx.ALIGN_CENTER), 1, wx.EXPAND)
+		gs.Add(wx.StaticText(panelBottom, label=str(m), style=wx.ALIGN_CENTER | wx.ST_NO_AUTORESIZE), 1, wx.EXPAND)
 		m = max(dataCurrent)
 		m =  "{0:.1f}".format(round(m,1))
-		gs.Add(wx.StaticText(panelBottom, label=str(m), style=wx.ALIGN_CENTER), 1, wx.EXPAND)
+		gs.Add(wx.StaticText(panelBottom, label=str(m), style=wx.ALIGN_CENTER | wx.ST_NO_AUTORESIZE), 1, wx.EXPAND)
 		m = max(dataWatts)
 		m = int(m)
-		gs.Add(wx.StaticText(panelBottom, label=str(m), style=wx.ALIGN_CENTER), 1, wx.EXPAND)
+		gs.Add(wx.StaticText(panelBottom, label=str(m), style=wx.ALIGN_CENTER | wx.ST_NO_AUTORESIZE), 1, wx.EXPAND)
 		m = max(dataRPM)
 		m = int(m)
-		gs.Add(wx.StaticText(panelBottom, label=str(m), style=wx.ALIGN_CENTER), 1, wx.EXPAND)
+		gs.Add(wx.StaticText(panelBottom, label=str(m), style=wx.ALIGN_CENTER | wx.ST_NO_AUTORESIZE), 1, wx.EXPAND)
 		m = max(dataPWM)
 		m = int(m)
-		gs.Add(wx.StaticText(panelBottom, label=str(m), style=wx.ALIGN_CENTER), 1, wx.EXPAND)
+		gs.Add(wx.StaticText(panelBottom, label=str(m), style=wx.ALIGN_CENTER | wx.ST_NO_AUTORESIZE), 1, wx.EXPAND)
 		m = max(dataUC)
 		m = int(m)
-		gs.Add(wx.StaticText(panelBottom, label=str(m), style=wx.ALIGN_CENTER), 1, wx.EXPAND)
+		gs.Add(wx.StaticText(panelBottom, label=str(m), style=wx.ALIGN_CENTER | wx.ST_NO_AUTORESIZE), 1, wx.EXPAND)
 
 		gs.Add(wx.StaticText(panelBottom, label='Average:', style=wx.ALIGN_RIGHT), 1, wx.EXPAND)
 		avg = reduce(lambda x, y: x + y, dataVoltage) / len(dataVoltage)
 		avg =  "{0:.1f}".format(round(avg,1))
-		gs.Add(wx.StaticText(panelBottom, label=str(avg), style=wx.ALIGN_CENTER), 1, wx.EXPAND)
+		gs.Add(wx.StaticText(panelBottom, label=str(avg), style=wx.ALIGN_CENTER | wx.ST_NO_AUTORESIZE), 1, wx.EXPAND)
 		avg = reduce(lambda x, y: x + y, dataCurrent) / len(dataCurrent)
 		avg =  "{0:.1f}".format(round(avg,1))
-		gs.Add(wx.StaticText(panelBottom, label=str(avg), style=wx.ALIGN_CENTER), 1, wx.EXPAND)
+		gs.Add(wx.StaticText(panelBottom, label=str(avg), style=wx.ALIGN_CENTER | wx.ST_NO_AUTORESIZE), 1, wx.EXPAND)
 		avg = reduce(lambda x, y: x + y, dataWatts) / len(dataWatts)
 		avg =  int(avg)
-		gs.Add(wx.StaticText(panelBottom, label=str(avg), style=wx.ALIGN_CENTER), 1, wx.EXPAND)
+		gs.Add(wx.StaticText(panelBottom, label=str(avg), style=wx.ALIGN_CENTER | wx.ST_NO_AUTORESIZE), 1, wx.EXPAND)
 		avg = reduce(lambda x, y: x + y, dataRPM) / len(dataRPM)
 		avg = int(avg)
-		gs.Add(wx.StaticText(panelBottom, label=str(avg), style=wx.ALIGN_CENTER), 1, wx.EXPAND)
+		gs.Add(wx.StaticText(panelBottom, label=str(avg), style=wx.ALIGN_CENTER | wx.ST_NO_AUTORESIZE), 1, wx.EXPAND)
 		avg = reduce(lambda x, y: x + y, dataPWM) / len(dataPWM)
 		avg = int(avg)
-		gs.Add(wx.StaticText(panelBottom, label=str(avg), style=wx.ALIGN_CENTER), 1, wx.EXPAND)
+		gs.Add(wx.StaticText(panelBottom, label=str(avg), style=wx.ALIGN_CENTER | wx.ST_NO_AUTORESIZE), 1, wx.EXPAND)
 		avg = (max(dataUC) - min(dataUC)) / max(dataDate) * 60
 		avg =  int(avg)
-		gs.Add(wx.StaticText(panelBottom, label=str(avg) + '/min', style=wx.ALIGN_CENTER), 1, wx.EXPAND)
+		gs.Add(wx.StaticText(panelBottom, label=str(avg) + '/min', style=wx.ALIGN_CENTER | wx.ST_NO_AUTORESIZE), 1, wx.EXPAND)
 
-		sizerMainVert.Add(panelBottom, 0, wx.LEFT | wx.TOP)
+		sizerMainVert.Add(panelBottom, 0, wx.LEFT | wx.TOP | wx.ALIGN_CENTER )
+		sizerMainVert.Add((0,10))
 
 		self.SetBackgroundColour('white')
 
+		# matplot events
+		self.figure.canvas.mpl_connect('motion_notify_event', self.OnMotion)
+		self.figure.canvas.mpl_connect('button_press_event', self.OnPress)
+		self.figure.canvas.mpl_connect('button_release_event', self.OnRelease)
+		self.figure.canvas.mpl_connect('resize_event', self.OnResize)
+
+		self.host.set_xlim(0, self.myXLim)
 
 		self.Show()
 
@@ -737,6 +776,100 @@ class UILogWindow(wx.Frame):
 		for sp in ax.spines.itervalues():
 			sp.set_visible(False)
 
+	def OnMotion(self, event):
+		if event.inaxes == None: 
+			return
+
+		x0, y0, x1, y1 = event.inaxes.dataLim.bounds
+
+		npts = len(event.inaxes.lines[0].get_ydata())
+		idx = int(round((npts-1) * (event.xdata-x0)/x1))
+
+		p1Values = self.p1.get_ydata();
+		p2Values = self.p2.get_ydata();
+		p3Values = self.p3.get_ydata();
+		p4Values = self.p4.get_ydata();
+		p5Values = self.p5.get_ydata();
+		p6Values = self.p6.get_ydata();
+		if len(p1Values) < idx + 1:
+			return
+
+		if self.background is None:
+			self.background = self.figure.canvas.copy_from_bbox(self.host.bbox)
+
+		# restore the clean slate background
+		self.figure.canvas.restore_region(self.background)
+
+		polygon = None
+		if self.selectStart == None:
+			linev = self.host.axvline(x=event.xdata, linewidth=1, color='#000000', alpha=0.5)
+			lineh = self.par5.axhline(y=event.ydata, linewidth=1, color='#000000', alpha=0.5)
+			self.host.draw_artist(linev)
+			self.host.draw_artist(lineh)
+		else:
+			width = abs(event.xdata - self.selectStart)
+			start = self.selectStart
+			if (event.xdata < start):
+				start = event.xdata
+			polygon = Rectangle((start, y0), width, y1, facecolor="grey", alpha=0.5)
+			self.host.add_patch(polygon)
+			self.host.draw_artist(polygon)
+
+		self.figure.canvas.blit(self.host.bbox)
+		if len(self.host.lines) > 1 :
+			linev.remove()
+			lineh.remove()
+		if polygon != None:
+			polygon.remove()
+
+		self.m1.SetLabel(str(p1Values[idx]))
+		self.m2.SetLabel(str(p3Values[idx]))
+		self.m3.SetLabel(str(int(p6Values[idx])))
+		self.m4.SetLabel(str(p2Values[idx]))
+		self.m5.SetLabel(str(p4Values[idx]))
+		self.m6.SetLabel(str(int(p5Values[idx])))
+
+	def OnPress(self, event):
+		if event.button == 3:
+			self.background =  None
+		 	self.host.set_xlim(0, self.myXLim)
+			self.canvas.draw()
+			self.canvas.Refresh()
+
+		else:
+			self.selectStart = event.xdata
+
+
+	def OnRelease(self, event):
+		if event.button != 1:
+			return
+
+		if  self.selectStart == None:
+			return
+
+		start = self.selectStart
+		end = event.xdata
+
+		if end == None:
+			self.selectStart = None
+			return
+
+		if (end < start):
+			temp = start
+			start = end
+			end = temp
+
+		width = abs(end - start)
+		if width >= 20:
+		 	self.host.set_xlim(start, end)
+
+		self.canvas.draw()
+		self.canvas.Refresh()
+		self.selectStart = None
+		self.background = None
+
+	def OnResize(self, event):
+		self.background = None
 
 app = wx.App(False)
 app.SetAppName("VBar control log analyzer")
