@@ -283,11 +283,9 @@ class MainWindow(wx.Frame):
 
 	def OnGridRangeSelect(self, event):
 		rows = self.grid.GetSelectedRows()
-		print rows
 		if len(rows) > 1:
 			self.grid.SelectRow(rows[1])
 			return
-		print len(rows)
 
 	def OnAbout(self,e):
 		dlg = wx.MessageDialog(self, "By Linus Larsson (linus.larsson@gmail.com)\n\nVBar log analyzer is in no way affiliated with Mikado\nor any of there products\n\nUse at your own risk",  "       VBar control log analyzer", wx.OK)
@@ -800,14 +798,16 @@ class UILogWindow(wx.Frame):
 		self.SetBackgroundColour('white')
 
 		# matplot events
-		self.figure.canvas.mpl_connect('motion_notify_event', self.OnMotion)
-		self.figure.canvas.mpl_connect('button_press_event', self.OnPress)
-		self.figure.canvas.mpl_connect('button_release_event', self.OnRelease)
-		self.figure.canvas.mpl_connect('resize_event', self.OnResize)
 
 		self.host.set_xlim(0, self.myXLim)
 
 		self.Show()
+		self.canvas.draw()
+		self.canvas.Refresh()
+		self.figure.canvas.mpl_connect('motion_notify_event', self.OnMotion)
+		self.figure.canvas.mpl_connect('button_press_event', self.OnPress)
+		self.figure.canvas.mpl_connect('button_release_event', self.OnRelease)
+		self.figure.canvas.mpl_connect('resize_event', self.OnResize)
 
 	def make_patch_spines_invisible(self, ax):
 		ax.set_frame_on(True)
@@ -817,7 +817,7 @@ class UILogWindow(wx.Frame):
 			sp.set_visible(False)
 
 	def OnMotion(self, event):
-		if event.inaxes == None: 
+		if event.inaxes == None:
 			return
 
 		x0, y0, x1, y1 = event.inaxes.dataLim.bounds
@@ -856,7 +856,11 @@ class UILogWindow(wx.Frame):
 			self.host.draw_artist(polygon)
 
 		self.figure.canvas.blit(self.host.bbox)
-		if len(self.host.lines) > 1 :
+		if self.selectStart == None:
+#			if len(self.host.lines) > 1 :
+#				while len(self.host.lines) > 0:
+#					print "remove: " + str(len(self.host.lines))
+#					self.host.lines[-1].remove();
 			linev.remove()
 			lineh.remove()
 		if polygon != None:
