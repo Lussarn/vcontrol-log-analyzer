@@ -162,6 +162,8 @@ class MainWindow(wx.Frame):
 		self.grid.SetDefaultCellOverflow(False)
 		self.grid.SetUseNativeColLabels(True)
 		self.grid.EnableGridLines(False)
+		self.grid.SetCellHighlightPenWidth(0)
+		self.grid.DisableDragRowSize()
 		self.grid.SetSelectionMode(wx.grid.Grid.wxGridSelectRows)
 
 		self.grid.SetColLabelAlignment(wx.ALIGN_LEFT, wx.ALIGN_CENTRE)
@@ -178,10 +180,11 @@ class MainWindow(wx.Frame):
 		self.grid.SetColLabelValue(10, 'VBLog')
 		self.grid.SetColLabelValue(11, 'UILog')
 
-
 		sizerPagerGrid.Add(self.grid, 1, wx.EXPAND)
 
 		self.grid.Bind(wx.grid.EVT_GRID_CELL_LEFT_DCLICK, self.OnGridDClick)
+		self.grid.Bind(wx.grid.EVT_GRID_SELECT_CELL, self.OnGridSelect)
+		self.grid.Bind(wx.grid.EVT_GRID_RANGE_SELECT, self.OnGridRangeSelect)
 
 		# Graph
 		pageGraph = wx.Panel(nb)
@@ -270,6 +273,22 @@ class MainWindow(wx.Frame):
 		if (col == 10):
 			frame = VBLogWindow(logId, self.analyzer)
 
+	def OnGridSelect(self, event):
+
+		row = event.GetRow()
+		sx,sy = self.grid.GetCellSize(row, 0) 
+		if sy != 1:
+			self.grid.ClearSelection()
+			return
+
+	def OnGridRangeSelect(self, event):
+		rows = self.grid.GetSelectedRows()
+		print rows
+		if len(rows) > 1:
+			self.grid.SelectRow(rows[1])
+			return
+		print len(rows)
+
 	def OnAbout(self,e):
 		dlg = wx.MessageDialog(self, "By Linus Larsson (linus.larsson@gmail.com)",  "       VBar control log analyzer", wx.OK)
 		dlg.ShowModal()
@@ -335,8 +354,21 @@ class MainWindow(wx.Frame):
 		i = 0
 		start = None
 		end = None
-		session = 0
-		for d in data['data']:
+		oldSession = 0
+		c = 0
+		for d in list(reversed(data['data'])):
+			if d['session'] != oldSession:
+				self.grid.InsertRows(i, 1)
+				self.grid.SetCellValue(i, 0, str(d['date'][0:10]));
+				self.grid.SetCellSize(i, 0, 1, 12);
+				self.grid.SetCellAlignment(i, 0, wx.ALIGN_CENTRE, wx.ALIGN_CENTRE);
+				self.grid.SetCellTextColour(i, 0, "#ffffff")
+				attr = wx.grid.GridCellAttr();
+				attr.SetBackgroundColour("#1F77B4")
+				self.grid.SetRowAttr(i, attr)
+				c = 0
+				i += 1
+
 			self.grid.InsertRows(i, 1)
 			self.grid.SetCellValue(i,0, str(d['id']))
 			self.grid.SetCellValue(i,1, d['date'])
@@ -352,22 +384,18 @@ class MainWindow(wx.Frame):
 			self.grid.SetCellValue(i,11, 'Yes' if str(d['haveuilog']) == '1' else '')
 
 			attr = wx.grid.GridCellAttr();
-			if d['session'] % 2 == 1:
-				if i % 2 == 1:
-					attr.SetBackgroundColour(wx.Colour(31,119,180))
-				else:
-					attr.SetBackgroundColour(wx.Colour(174,199,232))
+			if c % 2 == 0:
+				attr.SetBackgroundColour(wx.Colour(255,255,255))
 			else:
-				if i % 2 == 1:
-					attr.SetBackgroundColour(wx.Colour(188,189,34))
-				else:
-					attr.SetBackgroundColour(wx.Colour(219,219,141))
-
+					attr.SetBackgroundColour(wx.Colour(200,200,200))
 			self.grid.SetRowAttr(i, attr)
+			c += 1
+
 			i += 1
 
-			if start == None:
-				start = d['date']
+#			if start == None:
+			start = d['date']
+			oldSession = d['session']
 
 		self.grid.AutoSizeColumns(100)
 		for i in range(0, 10):
