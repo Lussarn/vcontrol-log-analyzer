@@ -290,7 +290,7 @@ class MainWindow(wx.Frame):
 		print len(rows)
 
 	def OnAbout(self,e):
-		dlg = wx.MessageDialog(self, "By Linus Larsson (linus.larsson@gmail.com)",  "       VBar control log analyzer", wx.OK)
+		dlg = wx.MessageDialog(self, "By Linus Larsson (linus.larsson@gmail.com)\n\nVBar log analyzer is in no way affiliated with Mikado\nor any of there products\n\nUse at your own risk",  "       VBar control log analyzer", wx.OK)
 		dlg.ShowModal()
 		dlg.Destroy()
 
