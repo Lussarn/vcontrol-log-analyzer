@@ -36,7 +36,7 @@ class MainWindow(wx.Frame):
 		w = int(Variable.get('gui-window-width', '1024'))
 		h = int(Variable.get('gui-window-height', '600'))
 
-		wx.Frame.__init__(self, None, title='VBar Control flight analyzer v2.3.0', size=(w, h))
+		wx.Frame.__init__(self, None, title='VBar Control flight analyzer v2.4.0', size=(w, h))
 		self.CreateStatusBar()
 
 
@@ -502,7 +502,7 @@ class LineBuilder:
 class VBLogWindow(wx.Frame):
 	def __init__(self, logId, analyzer):
 		data = analyzer.extract_log(logId)
-		wx.Frame.__init__(self, None, title='VBar Control flight analyzer v2.3.0 - Log Id ' + logId, size=(1200, 700))
+		wx.Frame.__init__(self, None, title='VBar Control flight analyzer v2.4.0 - Log Id ' + logId, size=(1200, 700))
 
 		textarea = wx.TextCtrl(self, -1,
                                 style=wx.TE_MULTILINE|wx.BORDER_SUNKEN|wx.TE_READONLY|
@@ -521,7 +521,7 @@ class UILogWindow(wx.Frame):
 		self.selectStart = None
 		data = analyzer.extract_ui(logId)
 
-		wx.Frame.__init__(self, None, title='VBar Control flight analyzer v2.3.0 - Log Id ' + logId, size=(1200, 700))
+		wx.Frame.__init__(self, None, title='VBar Control flight analyzer v2.4.0 - Log Id ' + logId, size=(1200, 700))
 		self.figure = Figure()
 		self.axes = self.figure.add_subplot(111)
 		self.canvas = FigureCanvas(self, -1, self.figure)

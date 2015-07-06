@@ -145,7 +145,7 @@ def main():
 	elif command == '--help':
 		usage()
 	elif command == '--version':
-		print "vcontrol-cli v2.3.0"
+		print "vcontrol-cli v2.4.0"
 	else:
 		usage()
 
