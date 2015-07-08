@@ -39,15 +39,6 @@ class MainWindow(wx.Frame):
 		wx.Frame.__init__(self, None, title='VBar Control flight analyzer v2.4.0', size=(w, h))
 		self.CreateStatusBar()
 
-
-		# Toolbar
-#	toolbar = self.CreateToolBar(wx.TB_TEXT)
-#	toolbar.AddLabelTool(1, 'Import', wx.Bitmap('assets/img/import.png'))
-#		toolbar.AddLabelTool(1, 'Publish', wx.Bitmap('assets/img/publish.png'))
-#		toolbar.AddLabelTool(1, 'Settings', wx.Bitmap('assets/img/settings.png'))
-#	toolbar.Realize()
-
-
 		# Creating the menubar.
 		menuBar = wx.MenuBar()
 
@@ -65,7 +56,6 @@ class MainWindow(wx.Frame):
 		self.Bind(wx.EVT_MENU, self.OnExit, menuExit)
 		self.Bind(wx.EVT_MENU, self.OnAbout, menuAbout)
 		self.Bind(wx.EVT_MENU, self.OnImport, menuImport)
-
 		sizerMainVert = wx.BoxSizer(wx.VERTICAL)
 
 		panelTop = wx.Panel(self)
@@ -125,6 +115,20 @@ class MainWindow(wx.Frame):
 		self.radioModel.Bind(wx.EVT_RADIOBUTTON, self.OnSelectStack)
 		self.radioGraph.Bind(wx.EVT_RADIOBUTTON, self.OnSelectStack)
 
+		# Short flights
+		self.panelShort = wx.Panel(panelTop, -1)
+		sizerShort = wx.BoxSizer(wx.VERTICAL)
+		self.panelShort.SetSizer(sizerShort)
+		sizerShort.Add(wx.StaticText(self.panelShort, label='Show logs'), 0, wx.ALIGN_LEFT | wx.LEFT | wx.RIGHT | wx.TOP, 5)
+		self.radioShowFlights = wx.RadioButton(self.panelShort, 0, "Only more than 1/4 capacity used", style = wx.RB_GROUP)
+		self.radioShowAll = wx.RadioButton(self.panelShort, 0, "All logs")
+		self.radioShowFlights.SetValue(True)
+		self.showAllFlights = 0
+		sizerShort.Add(self.radioShowFlights,  1, wx.ALIGN_LEFT | wx.LEFT | wx.RIGHT | wx.BOTTOM | wx.TOP, 5)
+		sizerShort.Add(self.radioShowAll,  1, wx.ALIGN_LEFT | wx.LEFT | wx.RIGHT | wx.BOTTOM, 5)
+		sizerTopHoriz.Add(self.panelShort, 0, wx.ALL, 5)
+		self.radioShowFlights.Bind(wx.EVT_RADIOBUTTON, self.OnSelectShort)
+		self.radioShowAll.Bind(wx.EVT_RADIOBUTTON, self.OnSelectShort)
 
 		# Connection status
 		panelStretch = wx.Panel(panelTop, -1)
@@ -248,6 +252,13 @@ class MainWindow(wx.Frame):
 			self.stackUse = 'battery'
 		self.populate_grid()		
 
+	def OnSelectShort(self, event):
+		if event.GetEventObject() == self.radioShowFlights:
+			self.showAllFlights = 0
+		else:
+			self.showAllFlights = 1
+		self.populate_grid()
+
 	def OnDateChanged(self, event):
 		self.populate_grid()		
 
@@ -337,8 +348,6 @@ class MainWindow(wx.Frame):
 		self.listBoxModel.Select(0)
 		self.listBoxModel.EnsureVisible(0)
 
-
-
 	def populate_grid(self):
 		# Grid
 		if self.grid.GetNumberRows() > 0:
@@ -347,7 +356,7 @@ class MainWindow(wx.Frame):
 		start = self._wxdate2pydate(self.datePickerStart.GetValue())
 		end = self._wxdate2pydate(self.datePickerEnd.GetValue())
 
-		data = self.analyzer.extract(batteryid=self.batterySelected, modelid=self.modelSelected, start=start, end=end)
+		data = self.analyzer.extract(batteryid=self.batterySelected, modelid=self.modelSelected, start=start, end=end, all=self.showAllFlights)
 
 		i = 0
 		start = None
@@ -387,11 +396,17 @@ class MainWindow(wx.Frame):
 			else:
 					attr.SetBackgroundColour(wx.Colour(200,200,200))
 			self.grid.SetRowAttr(i, attr)
+
+			if d['havevbarlogproblem'] == 1:
+				if c % 2 == 0:
+					self.grid.SetCellBackgroundColour(i, 10, "#ffaaaa")
+				else:
+					self.grid.SetCellBackgroundColour(i, 10, "#c86666")
+
 			c += 1
 
 			i += 1
 
-#			if start == None:
 			start = d['date']
 			oldSession = d['session']
 
@@ -435,7 +450,6 @@ class MainWindow(wx.Frame):
 		for ii in range(len(allColors)):
 			rr, gg, bb = allColors[ii]
 			allColors[ii] = (rr / 255., gg / 255., bb / 255.)
-
 
 		colors = allColors
 		modelColors = {}
@@ -510,21 +524,6 @@ class MainWindow(wx.Frame):
 
 		return os.path.join(base_path, relative_path)
 
-class LineBuilder:
-	def __init__(self, line):
-		self.line = line
-		self.xs = list(line.get_xdata())
-		self.ys = list(line.get_ydata())
-		self.cid = line.figure.canvas.mpl_connect('button_press_event', self)
-
-	def __call__(self, event):
-		print 'click', event
-		if event.inaxes!=self.line.axes: return
-		self.xs.append(event.xdata)
-		self.ys.append(event.ydata)
-		self.line.set_data(self.xs, self.ys)
-		self.line.figure.canvas.draw()
-
 class VBLogWindow(wx.Frame):
 	def __init__(self, logId, analyzer):
 		data = analyzer.extract_log(logId)
@@ -553,14 +552,9 @@ class UILogWindow(wx.Frame):
 		self.canvas = FigureCanvas(self, -1, self.figure)
 
 		sizerMainVert = wx.BoxSizer(wx.VERTICAL)
-
 		self.figure.set_facecolor('white')
-
-#		sizerMainVert.Add((0,10))
-#		sizerMainVert.Add(wx.StaticText(self, label='Goblin 700 - 12S 5000mAh #1 - 2013-10-06 13:23', size=15, style=wx.ALIGN_CENTER), 0, wx.EXPAND)
 		sizerMainVert.Add(self.canvas, 1, wx.LEFT | wx.TOP | wx.GROW)
 		self.SetSizer(sizerMainVert)
-
 
 		# Grid lines
 		self.axes.xaxis.grid(True)
@@ -645,7 +639,7 @@ class UILogWindow(wx.Frame):
 
 		# labels
 		self.host.set_xlabel("Duration (sec)", fontsize='x-small')
-		self.host.set_ylabel("Voltage", fontsize='x-small')
+		self.host.set_ylabel("Voltage(I)", fontsize='x-small')
 		par1.set_ylabel("RPM", fontsize='x-small')
 		par2.set_ylabel("Current(A)", fontsize='x-small')
 		par3.set_ylabel("PWM", fontsize='x-small')
@@ -857,10 +851,6 @@ class UILogWindow(wx.Frame):
 
 		self.figure.canvas.blit(self.host.bbox)
 		if self.selectStart == None:
-#			if len(self.host.lines) > 1 :
-#				while len(self.host.lines) > 0:
-#					print "remove: " + str(len(self.host.lines))
-#					self.host.lines[-1].remove();
 			linev.remove()
 			lineh.remove()
 		if polygon != None:

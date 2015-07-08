@@ -331,15 +331,17 @@ class Analyzer:
 			return False
 		return True
 
-	def extract(self, batteryid=None, modelid=None, start=None, end=None):
+	def extract(self, batteryid=None, modelid=None, start=None, end=None, all=0):
 		sql = "\
 			SELECT l.id, b.name as batteryname, m.name as modelname, l.date, l.duration, l.capacity, l.used, l.minvoltage, l.maxampere, l.uid, \
 			(select count(*) > 1 from vbarlog vbl WHERE l.id=vbl.logid) as havevbarlog, \
-			(select count(*) > 1 from uilog ul WHERE l.id=ul.logid) as haveuilog \
+			(select count(*) > 1 from uilog ul WHERE l.id=ul.logid) as haveuilog, \
+			(select count(*) > 1 from vbarlog vbl WHERE l.id=vbl.logid and (severity=4 and message not like '%Extreme Vibration%')) as havevbarlogproblem \
 			FROM batterylog l \
 			LEFT JOIN battery b on b.id=l.batteryid \
-			LEFT JOIN model m on m.id=l.modelid \
-			WHERE l.used * 4 > l.capacity"
+			LEFT JOIN model m on m.id=l.modelid"
+		if all == 0:
+			sql += " WHERE l.used * 4 > l.capacity"
 		if batteryid != None:
 			sql += " AND l.batteryid=" + str(batteryid)
 		if modelid != None:
@@ -359,6 +361,9 @@ class Analyzer:
 		session = 0
 		olddate = datetime.datetime(1970,1,1)
 		for row in cur.execute(sql):
+			if row[2] == None:
+				continue
+
 			# Calculate the session based on date
 			date = datetime.datetime.strptime(row[3], '%Y-%m-%d %H:%M:%S')
 			datediff = date - olddate
@@ -371,7 +376,7 @@ class Analyzer:
 			duration = "{0:02d}:{1:02d}".format(int(row[4] / 60), int(row[4] % 60))
 			flighttime += row[4]
 			used = str(row[6]) + ' (' + str(int(float(row[6]) / row[5] * 100)) + '%)'
-			data.append({'id': row[0], 'date': row[3], 'battery': row[1], 'model': row[2], 'duration': duration, 'capacity': row[5], 'used': used, 'minv': row[7], 'maxa': row[8], 'idlev': row[9], 'session': session, 'havevbarlog': row[10], 'haveuilog': row[11] })
+			data.append({'id': row[0], 'date': row[3], 'battery': row[1], 'model': row[2], 'duration': duration, 'capacity': row[5], 'used': used, 'minv': row[7], 'maxa': row[8], 'idlev': row[9], 'session': session, 'havevbarlog': row[10], 'haveuilog': row[11], 'havevbarlogproblem': row[12] })
 			olddate = date
 
 		capacityused = round(float(capacityused) / 1000, 2)
