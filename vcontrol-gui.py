@@ -136,6 +136,11 @@ class MainWindow(wx.Frame):
 		self.radioShowFlights.Bind(wx.EVT_RADIOBUTTON, self.OnSelectShort)
 		self.radioShowAll.Bind(wx.EVT_RADIOBUTTON, self.OnSelectShort)
 
+		self.panelStack.Hide()
+		self.panelShort.Hide()
+		self.sizerExtra.Layout()
+
+
 		# Connection status
 		panelStretch = wx.Panel(panelTop, -1)
 		sizerStretch = wx.BoxSizer(wx.VERTICAL)
@@ -236,9 +241,10 @@ class MainWindow(wx.Frame):
 		self.populate_grid()
 
 		self.Show()
-		self.panelStack.Hide()
 		self.panelShort.Show()
+		self.panelStack.Hide()
 		self.sizerExtra.Layout()
+		self.sizerTopHoriz.Layout()
 		self.Bind(wx.EVT_SIZE, self.OnSize)
 
 	def OnSize(self,event):
