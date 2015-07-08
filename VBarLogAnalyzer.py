@@ -396,6 +396,22 @@ class Analyzer:
 			'last': datetime.datetime.strptime(rs[1][0:10],'%Y-%m-%d')
 		}
 
+	def get_seasons(self):
+		cur = self._db().cursor()
+		cur.execute("SELECT MIN(date) AS mindate, MAX(date) AS maxdate FROM batterylog WHERE date  IS NOT NULL")
+		rs = cur.fetchone()
+		if rs == (None, None):
+			return [str(datetime.now().year)]
+
+		first = int(rs[0][0:4])
+		last = int(rs[1][0:4])
+
+		out = []
+		for y in xrange(first,last + 1):
+			out.append(str(y))
+
+		return out
+
 	def extract_byweek(self, batteryid=None, modelid=None, start=None, end=None, group='model'):
 		sql = "\
 			SELECT (STRFTIME('%Y', date) || '-' || STRFTIME('%W', date)),count(*) AS week FROM batterylog WHERE used * 4 > capacity GROUP BY (STRFTIME('%Y', date) || '-' || STRFTIME('%W', date))"

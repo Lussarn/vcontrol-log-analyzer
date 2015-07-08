@@ -32,11 +32,12 @@ class MainWindow(wx.Frame):
 		self.modelSelected = None
 
 		interval = self.analyzer.get_date_interval()
+		seasons = self.analyzer.get_seasons()
 
 		w = int(Variable.get('gui-window-width', '1024'))
 		h = int(Variable.get('gui-window-height', '600'))
 
-		wx.Frame.__init__(self, None, title='VBar Control flight analyzer v2.4.0', size=(w, h))
+		wx.Frame.__init__(self, None, title='VBar Control flight analyzer v2.5.0', size=(w, h))
 		self.CreateStatusBar()
 
 		# Creating the menubar.
@@ -68,17 +69,13 @@ class MainWindow(wx.Frame):
 		sizerDate = wx.BoxSizer(wx.VERTICAL)
 		panelDate.SetSizer(sizerDate)
 
-		# Start date
-		sizerDate.Add(wx.StaticText(panelDate, label='Start date'), 0, wx.ALIGN_LEFT | wx.LEFT | wx.RIGHT | wx.TOP, 5)
-		self.datePickerStart = wx.DatePickerCtrl(panelDate, dt=self._pydate2wxdate(interval['first']))
-		sizerDate.Add(self.datePickerStart, 0, wx.ALIGN_LEFT | wx.LEFT | wx.RIGHT | wx.BOTTOM, 5)
-		self.datePickerStart.Bind(wx.EVT_DATE_CHANGED, self.OnDateChanged)
-
-		# End date
-		sizerDate.Add(wx.StaticText(panelDate, label='End date'), 0, wx.ALIGN_LEFT | wx.LEFT | wx.RIGHT | wx.TOP, 5)
-		self.datePickerEnd = wx.DatePickerCtrl(panelDate, dt=self._pydate2wxdate(interval['last']))
-		sizerDate.Add(self.datePickerEnd, 0, wx.ALIGN_LEFT | wx.LEFT | wx.RIGHT | wx.BOTTOM, 5)
-		self.datePickerEnd.Bind(wx.EVT_DATE_CHANGED, self.OnDateChanged)
+		# Season
+		sizerDate.Add(wx.StaticText(panelDate, label='Season'), 0, wx.ALIGN_LEFT | wx.LEFT | wx.RIGHT | wx.TOP, 5)
+		self.comboBoxSeason = wx.ComboBox(panelDate, choices=['All seasons'] + seasons)
+		self.comboBoxSeason.SetEditable(False)
+		self.comboBoxSeason.SetStringSelection(seasons[-1])
+		sizerDate.Add(self.comboBoxSeason, 0, wx.ALIGN_LEFT | wx.LEFT | wx.RIGHT | wx.BOTTOM, 5)
+		self.comboBoxSeason.Bind(wx.EVT_COMBOBOX, self.OnSeasonChanged)
 
 		# Battery
 		panelBattery = wx.Panel(panelTop, -1, style=wx.BORDER_RAISED)
@@ -276,7 +273,7 @@ class MainWindow(wx.Frame):
 			self.showAllFlights = 1
 		self.populate_grid()
 
-	def OnDateChanged(self, event):
+	def OnSeasonChanged(self, event):
 		self.populate_grid()		
 
 	def OnSelectBattery(self, event):
@@ -370,8 +367,13 @@ class MainWindow(wx.Frame):
 		if self.grid.GetNumberRows() > 0:
 			self.grid.DeleteRows(0, self.grid.GetNumberRows())
 
-		start = self._wxdate2pydate(self.datePickerStart.GetValue())
-		end = self._wxdate2pydate(self.datePickerEnd.GetValue())
+		season = self.comboBoxSeason.GetStringSelection()
+		if season == 'All seasons':
+			start = datetime.datetime.strptime('1900', '%Y')
+			end = datetime.datetime.strptime('3000', '%Y')
+		else:
+			start = datetime.datetime.strptime(season, '%Y')
+			end = datetime.datetime.strptime(str(int(season) + 1), '%Y')
 
 		data = self.analyzer.extract(batteryid=self.batterySelected, modelid=self.modelSelected, start=start, end=end, all=self.showAllFlights)
 
@@ -544,7 +546,7 @@ class MainWindow(wx.Frame):
 class VBLogWindow(wx.Frame):
 	def __init__(self, logId, analyzer):
 		data = analyzer.extract_log(logId)
-		wx.Frame.__init__(self, None, title='VBar Control flight analyzer v2.4.0 - Log Id ' + logId, size=(1200, 700))
+		wx.Frame.__init__(self, None, title='VBar Control flight analyzer v2.5.0 - Log Id ' + logId, size=(1200, 700))
 
 		textarea = wx.TextCtrl(self, -1,
                                 style=wx.TE_MULTILINE|wx.BORDER_SUNKEN|wx.TE_READONLY|
@@ -563,7 +565,7 @@ class UILogWindow(wx.Frame):
 		self.selectStart = None
 		data = analyzer.extract_ui(logId)
 
-		wx.Frame.__init__(self, None, title='VBar Control flight analyzer v2.4.0 - Log Id ' + logId, size=(1200, 700))
+		wx.Frame.__init__(self, None, title='VBar Control flight analyzer v2.5.0 - Log Id ' + logId, size=(1200, 700))
 		self.figure = Figure()
 		self.axes = self.figure.add_subplot(111)
 		self.canvas = FigureCanvas(self, -1, self.figure)
