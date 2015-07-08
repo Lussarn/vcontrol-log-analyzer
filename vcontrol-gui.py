@@ -59,12 +59,12 @@ class MainWindow(wx.Frame):
 		sizerMainVert = wx.BoxSizer(wx.VERTICAL)
 
 		panelTop = wx.Panel(self)
-		sizerTopHoriz = wx.BoxSizer(wx.HORIZONTAL)
-		panelTop.SetSizer(sizerTopHoriz)
+		self.sizerTopHoriz = wx.BoxSizer(wx.HORIZONTAL)
+		panelTop.SetSizer(self.sizerTopHoriz)
 
 		# Date panel
 		panelDate = wx.Panel(panelTop, -1)
-		sizerTopHoriz.Add(panelDate, 0, wx.ALL, 5)
+		self.sizerTopHoriz.Add(panelDate, 0, wx.ALL, 5)
 		sizerDate = wx.BoxSizer(wx.VERTICAL)
 		panelDate.SetSizer(sizerDate)
 
@@ -87,7 +87,7 @@ class MainWindow(wx.Frame):
 		self.listBoxBattery = wx.ListBox(panelBattery, size=(200,100))
 		sizerBattery.Add(self.listBoxBattery, 0, wx.ALIGN_LEFT | wx.LEFT | wx.RIGHT | wx.BOTTOM, 5)
 		panelBattery.SetSizer(sizerBattery)
-		sizerTopHoriz.Add(panelBattery, 0, wx.ALIGN_LEFT | wx.RIGHT | wx.TOP | wx.BOTTOM, 5)
+		self.sizerTopHoriz.Add(panelBattery, 0, wx.ALIGN_LEFT | wx.RIGHT | wx.TOP | wx.BOTTOM, 5)
 		self.listBoxBattery.Bind(wx.EVT_LISTBOX, self.OnSelectBattery)
 
 		# Model
@@ -97,11 +97,17 @@ class MainWindow(wx.Frame):
 		self.listBoxModel = wx.ListBox(panelModel, size=(200,100))
 		sizerModel.Add(self.listBoxModel, 0, wx.ALIGN_LEFT | wx.LEFT | wx.RIGHT | wx.BOTTOM, 5)
 		panelModel.SetSizer(sizerModel)
-		sizerTopHoriz.Add(panelModel, 0, wx.ALIGN_LEFT | wx.RIGHT | wx.TOP | wx.BOTTOM, 5)
+		self.sizerTopHoriz.Add(panelModel, 0, wx.ALIGN_LEFT | wx.RIGHT | wx.TOP | wx.BOTTOM, 5)
 		self.listBoxModel.Bind(wx.EVT_LISTBOX, self.OnSelectModel)
 
+		# Extra GUI data
+		self.panelExtra = wx.Panel(panelTop, -1)
+		self.sizerExtra = wx.BoxSizer(wx.VERTICAL)
+		self.panelExtra.SetSizer(self.sizerExtra)
+		self.sizerTopHoriz.Add(self.panelExtra, 0, wx.ALL, 5)
+
 		# Stack
-		self.panelStack = wx.Panel(panelTop, -1)
+		self.panelStack = wx.Panel(self.panelExtra, -1)
 		sizerStack = wx.BoxSizer(wx.VERTICAL)
 		self.panelStack.SetSizer(sizerStack)
 		sizerStack.Add(wx.StaticText(self.panelStack, label='Stack graph as'), 0, wx.ALIGN_LEFT | wx.LEFT | wx.RIGHT | wx.TOP, 5)
@@ -111,12 +117,12 @@ class MainWindow(wx.Frame):
 		self.stackUse = 'model'
 		sizerStack.Add(self.radioModel,  1, wx.ALIGN_LEFT | wx.LEFT | wx.RIGHT | wx.BOTTOM | wx.TOP, 5)
 		sizerStack.Add(self.radioGraph,  1, wx.ALIGN_LEFT | wx.LEFT | wx.RIGHT | wx.BOTTOM, 5)
-		sizerTopHoriz.Add(self.panelStack, 0, wx.ALL, 5)
+		self.sizerExtra.Add(self.panelStack, 0, wx.ALL, 5)
 		self.radioModel.Bind(wx.EVT_RADIOBUTTON, self.OnSelectStack)
 		self.radioGraph.Bind(wx.EVT_RADIOBUTTON, self.OnSelectStack)
 
 		# Short flights
-		self.panelShort = wx.Panel(panelTop, -1)
+		self.panelShort = wx.Panel(self.panelExtra, -1)
 		sizerShort = wx.BoxSizer(wx.VERTICAL)
 		self.panelShort.SetSizer(sizerShort)
 		sizerShort.Add(wx.StaticText(self.panelShort, label='Show logs'), 0, wx.ALIGN_LEFT | wx.LEFT | wx.RIGHT | wx.TOP, 5)
@@ -126,7 +132,7 @@ class MainWindow(wx.Frame):
 		self.showAllFlights = 0
 		sizerShort.Add(self.radioShowFlights,  1, wx.ALIGN_LEFT | wx.LEFT | wx.RIGHT | wx.BOTTOM | wx.TOP, 5)
 		sizerShort.Add(self.radioShowAll,  1, wx.ALIGN_LEFT | wx.LEFT | wx.RIGHT | wx.BOTTOM, 5)
-		sizerTopHoriz.Add(self.panelShort, 0, wx.ALL, 5)
+		self.sizerExtra.Add(self.panelShort, 0, wx.ALL, 5)
 		self.radioShowFlights.Bind(wx.EVT_RADIOBUTTON, self.OnSelectShort)
 		self.radioShowAll.Bind(wx.EVT_RADIOBUTTON, self.OnSelectShort)
 
@@ -134,7 +140,7 @@ class MainWindow(wx.Frame):
 		panelStretch = wx.Panel(panelTop, -1)
 		sizerStretch = wx.BoxSizer(wx.VERTICAL)
 		panelStretch.SetSizer(sizerStretch)
-		sizerTopHoriz.Add(panelStretch, 1, wx.EXPAND)
+		self.sizerTopHoriz.Add(panelStretch, 1, wx.EXPAND)
 		panelStatus = wx.Panel(panelStretch, -1)
 		sizerStatus = wx.BoxSizer(wx.VERTICAL)
 		panelStatus.SetSizer(sizerStatus)
@@ -231,6 +237,8 @@ class MainWindow(wx.Frame):
 
 		self.Show()
 		self.panelStack.Hide()
+		self.panelShort.Show()
+		self.sizerExtra.Layout()
 		self.Bind(wx.EVT_SIZE, self.OnSize)
 
 	def OnSize(self,event):
@@ -241,8 +249,11 @@ class MainWindow(wx.Frame):
 	def OnNotebookChanged(self, event):
 		if event.GetSelection() == 0:
 			self.panelStack.Hide()
+			self.panelShort.Show()
 		elif event.GetSelection() == 1:
+			self.panelShort.Hide()
 			self.panelStack.Show()
+		self.sizerExtra.Layout()
 		event.Skip()
 
 	def OnSelectStack(self, event):
