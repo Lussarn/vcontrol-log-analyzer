@@ -729,7 +729,7 @@ class UILogWindow(wx.Frame):
 		t6.SetForegroundColour("#9467BD")		
 		gs.Add(t6, 1, wx.EXPAND)
 
-		gs.Add(wx.StaticText(panelBottom, label='Mouse:', style=wx.ALIGN_RIGHT), 1, wx.EXPAND)
+		gs.Add(wx.StaticText(panelBottom, label='Mouse', style=wx.ALIGN_RIGHT), 1, wx.EXPAND)
 		self.m1 = wx.StaticText(panelBottom, label="0", style=wx.ALIGN_CENTER | wx.ST_NO_AUTORESIZE)
 		gs.Add(self.m1, 1, wx.EXPAND)
 		self.m2 = wx.StaticText(panelBottom, label="0", style=wx.ALIGN_CENTER | wx.ST_NO_AUTORESIZE)
@@ -743,7 +743,7 @@ class UILogWindow(wx.Frame):
 		self.m6 = wx.StaticText(panelBottom, label="0", style=wx.ALIGN_CENTER | wx.ST_NO_AUTORESIZE)
 		gs.Add(self.m6, 1, wx.EXPAND)
 
-		gs.Add(wx.StaticText(panelBottom, label='Min:', style=wx.ALIGN_RIGHT), 1, wx.EXPAND)
+		gs.Add(wx.StaticText(panelBottom, label='Min', style=wx.ALIGN_RIGHT), 1, wx.EXPAND)
 		m = min(dataVoltage)
 		m =  "{0:.1f}".format(round(m,1))
 		gs.Add(wx.StaticText(panelBottom, label=str(m), style=wx.ALIGN_CENTER | wx.ST_NO_AUTORESIZE), 1, wx.EXPAND)
@@ -763,7 +763,7 @@ class UILogWindow(wx.Frame):
 		m = int(m)
 		gs.Add(wx.StaticText(panelBottom, label=str(m), style=wx.ALIGN_CENTER | wx.ST_NO_AUTORESIZE), 1, wx.EXPAND)
 
-		gs.Add(wx.StaticText(panelBottom, label='Max:', style=wx.ALIGN_RIGHT), 1, wx.EXPAND)
+		gs.Add(wx.StaticText(panelBottom, label='Max', style=wx.ALIGN_RIGHT), 1, wx.EXPAND)
 		m = max(dataVoltage)
 		m =  "{0:.1f}".format(round(m,1))
 		gs.Add(wx.StaticText(panelBottom, label=str(m), style=wx.ALIGN_CENTER | wx.ST_NO_AUTORESIZE), 1, wx.EXPAND)
@@ -783,7 +783,7 @@ class UILogWindow(wx.Frame):
 		m = int(m)
 		gs.Add(wx.StaticText(panelBottom, label=str(m), style=wx.ALIGN_CENTER | wx.ST_NO_AUTORESIZE), 1, wx.EXPAND)
 
-		gs.Add(wx.StaticText(panelBottom, label='Average:', style=wx.ALIGN_RIGHT), 1, wx.EXPAND)
+		gs.Add(wx.StaticText(panelBottom, label='Average', style=wx.ALIGN_RIGHT), 1, wx.EXPAND)
 		avg = reduce(lambda x, y: x + y, dataVoltage) / len(dataVoltage)
 		avg =  "{0:.1f}".format(round(avg,1))
 		gs.Add(wx.StaticText(panelBottom, label=str(avg), style=wx.ALIGN_CENTER | wx.ST_NO_AUTORESIZE), 1, wx.EXPAND)
