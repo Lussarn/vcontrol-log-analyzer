@@ -137,7 +137,6 @@ class MainWindow(wx.Frame):
 		self.panelShort.Hide()
 		self.sizerExtra.Layout()
 
-
 		# Connection status
 		panelStretch = wx.Panel(panelTop, -1)
 		sizerStretch = wx.BoxSizer(wx.VERTICAL)
@@ -329,9 +328,12 @@ class MainWindow(wx.Frame):
 		self.SetStatusText('Importing from VBar Control, please wait...')
 		self.analyzer.import_data()
 
-		interval = self.analyzer.get_date_interval()
-		self.datePickerStart.SetValue(dt=self._pydate2wxdate(interval['first']))
-		self.datePickerEnd.SetValue(dt=self._pydate2wxdate(interval['last']))
+		seasons = self.analyzer.get_seasons()
+		self.comboBoxSeason.Clear()
+		self.comboBoxSeason.Append('All seasons')
+		for s in seasons:
+			self.comboBoxSeason.Append(s)
+		self.comboBoxSeason.SetStringSelection(seasons[-1])
 
 		self.populate_gear()
 		self.populate_grid()

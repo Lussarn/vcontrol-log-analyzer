@@ -401,7 +401,7 @@ class Analyzer:
 		cur.execute("SELECT MIN(date) AS mindate, MAX(date) AS maxdate FROM batterylog WHERE date  IS NOT NULL")
 		rs = cur.fetchone()
 		if rs == (None, None):
-			return [str(datetime.now().year)]
+			return [str(datetime.datetime.now().year)]
 
 		first = int(rs[0][0:4])
 		last = int(rs[1][0:4])
