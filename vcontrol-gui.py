@@ -37,7 +37,7 @@ class MainWindow(wx.Frame):
 		w = int(Variable.get('gui-window-width', '1024'))
 		h = int(Variable.get('gui-window-height', '600'))
 
-		wx.Frame.__init__(self, None, title='VBar Control flight analyzer v2.5.0', size=(w, h))
+		wx.Frame.__init__(self, None, title='VBar Control flight analyzer v2.5.1', size=(w, h))
 		self.CreateStatusBar()
 
 		# Creating the menubar.
@@ -548,7 +548,7 @@ class MainWindow(wx.Frame):
 class VBLogWindow(wx.Frame):
 	def __init__(self, logId, analyzer):
 		data = analyzer.extract_log(logId)
-		wx.Frame.__init__(self, None, title='VBar Control flight analyzer v2.5.0 - Log Id ' + logId, size=(1200, 700))
+		wx.Frame.__init__(self, None, title='VBar Control flight analyzer v2.5.1 - Log Id ' + logId, size=(1200, 700))
 
 		textarea = wx.TextCtrl(self, -1,
                                 style=wx.TE_MULTILINE|wx.BORDER_SUNKEN|wx.TE_READONLY|
@@ -567,7 +567,7 @@ class UILogWindow(wx.Frame):
 		self.selectStart = None
 		data = analyzer.extract_ui(logId)
 
-		wx.Frame.__init__(self, None, title='VBar Control flight analyzer v2.5.0 - Log Id ' + logId, size=(1200, 700))
+		wx.Frame.__init__(self, None, title='VBar Control flight analyzer v2.5.1 - Log Id ' + logId, size=(1200, 700))
 		self.figure = Figure()
 		self.axes = self.figure.add_subplot(111)
 		self.canvas = FigureCanvas(self, -1, self.figure)
@@ -654,7 +654,10 @@ class UILogWindow(wx.Frame):
 
 		self.host.set_ylim(0, maxVoltage * 1.7)
 		par2.set_ylim(0,maxCurrent * 2)
-		par1.set_ylim(0,maxRPM * 1.5)
+		if maxRPM == 0:
+			par1.set_ylim(0,100)
+		else:
+			par1.set_ylim(0,maxRPM * 1.5)
 		self.par5.set_ylim(0,maxWatts * 1.5)
 		par4.set_ylim(0)
 

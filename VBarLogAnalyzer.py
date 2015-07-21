@@ -290,7 +290,7 @@ class Analyzer:
 					continue
 
 	def _find_vcontrol_path(self):
-#		return '/Users/linus/vcontrol'
+		return '/tmp/dkc-vbar'
 		if 'linux' in sys.platform:
 #			return "/tmp";
 			drives=subprocess.Popen('mount', shell=True, stdout=subprocess.PIPE)
@@ -461,11 +461,19 @@ class Analyzer:
 		clipEnd = False
 		i = 0
 		lastNotZero = 0
+		firstNotZero = 0
+		firstRPM = False
+		lastRPM = False
 		for row in cur.execute(sql):
-			if clipStart == False and int(row[5]) == 0:
-				continue
-			if clipStart == False:
+			if firstRPM == False:
+				firstRPM = row[1]
+			lastRPM = row[1]
+
+			if clipStart == False and int(row[5]) != 0:
 				clipStart = row[1]
+
+			if  firstNotZero == 0 and int(row[5]) != 0:
+				firstNotZero = i
 
 			out.append({
 				'model': row[0],
@@ -480,7 +488,11 @@ class Analyzer:
 				clipEnd = row[1]
 			i+=1
 
-		out = out[0:lastNotZero]
+		if clipStart == False:
+			clipStart = firstRPM
+			clipEnd = lastRPM
+		else:
+			out = out[firstNotZero:lastNotZero]
 
 		# Now we shuold evenly distribute end over the
 		# seconds in clipStart and clipEnd
