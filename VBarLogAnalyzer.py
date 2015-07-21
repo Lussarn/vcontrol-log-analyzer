@@ -290,7 +290,7 @@ class Analyzer:
 					continue
 
 	def _find_vcontrol_path(self):
-		return '/tmp/dkc-vbar'
+#		return '/tmp/dkc-vbar'
 		if 'linux' in sys.platform:
 #			return "/tmp";
 			drives=subprocess.Popen('mount', shell=True, stdout=subprocess.PIPE)
