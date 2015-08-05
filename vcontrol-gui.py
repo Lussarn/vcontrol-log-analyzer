@@ -773,19 +773,20 @@ class UILogWindow(wx.Frame):
 
 		self.graphs[0].set_xlim(0, self.duration)
 
+		# matplot events
+		self.figure.canvas.mpl_connect('motion_notify_event', self.OnMotion)
+		self.figure.canvas.mpl_connect('button_press_event', self.OnPress)
+		self.figure.canvas.mpl_connect('button_release_event', self.OnRelease)
+		self.figure.canvas.mpl_connect('resize_event', self.OnResize)
+
+		self.Show()
 		self.canvas.draw()
 		self.canvas.Refresh()
 		for i in xrange(0,6):
 			self.graphs[i].set_visible(self.valueOnCheck[i].IsChecked());
 		self.canvas.draw()
 		self.canvas.Refresh()
-		self.Show()
 
-		# matplot events
-		self.figure.canvas.mpl_connect('motion_notify_event', self.OnMotion)
-		self.figure.canvas.mpl_connect('button_press_event', self.OnPress)
-		self.figure.canvas.mpl_connect('button_release_event', self.OnRelease)
-		self.figure.canvas.mpl_connect('resize_event', self.OnResize)
 
 	def make_patch_spines_invisible(self, ax):
 		ax.set_frame_on(True)
