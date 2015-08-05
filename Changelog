@@ -23,3 +23,8 @@ v2.5.0
 Ability to see all logs
 Date out - Season in
 Red background on severe problem in vbarlog
+
+v2.6.0
+UI - able to hide graphs
+UI - Min/Max/Average when selecting range
+UI - Red if unable to zoom
