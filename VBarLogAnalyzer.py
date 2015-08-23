@@ -320,7 +320,7 @@ class Analyzer:
 				words = line.split()
 				if len(words) < 2:
 					continue
-				if words[1] == "VControl":
+				if words[1].upper() == "VCONTROL":
 					path = words[0] + '\\'
 					break
 
