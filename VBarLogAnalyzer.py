@@ -166,7 +166,7 @@ class Analyzer:
 					# Lets see if we got a vbar log for this flight
 
 					cur = self._db().cursor()
-					cur.execute("SELECT original_filename FROM vbarlog vbl WHERE model=? AND logid IS NULL AND (date = ? AND message = 'VBar Logfile End') OR (date <= ? AND (SELECT original_filename FROM vbarlog WHERE id=vbl.id + 1 AND date > ?) = vbl.original_filename) ORDER BY date DESC LIMIT 1",
+					cur.execute("SELECT original_filename FROM vbarlog vbl WHERE model=? AND logid IS NULL AND (date = ? AND message LIKE '%Logfile End%') OR (date <= ? AND (SELECT original_filename FROM vbarlog WHERE id=vbl.id + 1 AND date > ?) = vbl.original_filename) ORDER BY date DESC LIMIT 1",
 						[model, date, date, date])
 					rs = cur.fetchone()
 					if rs != None:
@@ -177,6 +177,8 @@ class Analyzer:
 						self._db().commit()
 						
 						uiFile = vbarFile.replace('_vbar.log', '_ui.csv')
+						uiFile = uiFile.replace('_vcp.log', '_ui.csv')
+						uiFile = uiFile.replace('_vplane.log', '_ui.csv')
 						cur = self._db().cursor()
 						cur.execute('UPDATE uilog SET logid = ? WHERE original_filename = ?',
 						 	[logid, uiFile])
@@ -190,7 +192,7 @@ class Analyzer:
 		modelDirs = [ os.path.join(logPath,f) for f in os.listdir(logPath) if os.path.isdir(os.path.join(logPath,f)) ]
 		for modelPath in modelDirs:
 			# Open all vbar files and check if they need importing
-			vbarFiles = [ f for f in os.listdir(modelPath) if os.path.isfile(os.path.join(modelPath, f))  and '_vbar.log' in f ]
+			vbarFiles = [ f for f in os.listdir(modelPath) if os.path.isfile(os.path.join(modelPath, f))  and ('_vbar.log' in f or '_vcp.log' in f or '_vplane.log' in f) ]
 			for vbarFile in vbarFiles:
 				# import the vbar file
 				with open(os.path.join(modelPath, vbarFile)) as f:
@@ -205,18 +207,18 @@ class Analyzer:
 					if firstLine == False:
 						firstLine = True
 						cols = line.split(' -- ')
-						if len(cols) != 4 and cols[0] != 'VBar Start':
+						if len(cols) != 4 and 'Start' not in cols[0]:
 							error = True
 							break
 						modelName = unicode(cols[1], errors='ignore')
 						startdate = date = datetime.datetime.strptime(cols[2],'%d.%m.%Y')
 						continue
 
-					if ('VBar Logfile End' in line):
+					if ('Logfile End' in line):
 						cols = line.split(' -- ')
 						sqlDate = datetime.datetime.strptime(cols[1] + ' ' + cols[2],'%d.%m.%Y %H:%M:%S').strftime('%Y-%m-%d %H:%M:%S')
 						cur.execute('INSERT INTO vbarlog (original_filename, model, date, severity, message) VALUES (?,?,?,?,?)',
-						 	[vbarFile, modelName, sqlDate, 1, 'VBar Logfile End'])
+						 	[vbarFile, modelName, sqlDate, 1, line])
 						self._db().commit()
 						break
 
@@ -246,6 +248,8 @@ class Analyzer:
 
 				# See if we have an ui file for this flight
 				uiFile = vbarFile.replace('_vbar.log', '_ui.csv')
+				uiFile = uiFile.replace('_vcp.log', '_ui.csv')
+				uiFile = uiFile.replace('_vplane.log', '_ui.csv')
 				if not os.path.isfile(os.path.join(modelPath, uiFile)):
 					continue
 
@@ -295,7 +299,6 @@ class Analyzer:
 #		return '/tmp/dkc-vbar'
 		return 'c:\\users\\linus\\vc\\rainer'
 		if 'linux' in sys.platform:
-#			return "/tmp";
 			drives=subprocess.Popen('mount', shell=True, stdout=subprocess.PIPE)
 			lines, err=drives.communicate()
 			words = lines.split()
