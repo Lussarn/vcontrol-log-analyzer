@@ -235,6 +235,8 @@ class Analyzer:
 							break
 
 					lastHour = hour
+					cols[2] = unicode(cols[2], errors='ignore')
+
 					cur.execute('INSERT INTO vbarlog (original_filename, model, date, severity, message) VALUES (?,?,?,?,?)',
 					 	[vbarFile, modelName, sqlDate, int(cols[1]), cols[2]])
 				self._db().commit()
@@ -291,6 +293,7 @@ class Analyzer:
 
 	def _find_vcontrol_path(self):
 #		return '/tmp/dkc-vbar'
+		return 'c:\\users\\linus\\vc\\rainer'
 		if 'linux' in sys.platform:
 #			return "/tmp";
 			drives=subprocess.Popen('mount', shell=True, stdout=subprocess.PIPE)
@@ -308,21 +311,15 @@ class Analyzer:
 			if lines.find(' /Volumes/VControl ') >= 0:
 				path = '/Volumes/VControl'
 		elif 'win' in sys.platform:
-			cmd = 'wmic'
-			if os.path.isfile('c:\\windows\\system32\\wbem\\wmic.exe'):
-				cmd = 'c:\\windows\\system32\\wbem\\wmic.exe'
+			import win32api
 
-			drivelist = subprocess.Popen(cmd + ' volume get driveletter,label', shell=False, stdout=subprocess.PIPE)
-			lines, err = drivelist.communicate()
-			lines = lines.split('\r\n')
 			path = None
-			for line in lines:
-				words = line.split()
-				if len(words) < 2:
-					continue
-				if words[1].upper() == "VCONTROL":
-					path = words[0] + '\\'
-					break
+			drives = win32api.GetLogicalDriveStrings()
+			drives = drives.split('\000')[:-1]
+			for drive in drives:
+				if os.path.isfile(drive + 'vcontrol.id'):
+					path = drive;
+					break;
 
 		return path
 
