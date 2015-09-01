@@ -232,8 +232,8 @@ class MainWindow(wx.Frame):
 
 		self._vcontrol_connected = False
 
-		self.populate_gear()
 		self.populate_grid()
+		self.populate_gear()
 
 		self.Show()
 		self.panelShort.Show()
@@ -273,6 +273,7 @@ class MainWindow(wx.Frame):
 
 	def OnSeasonChanged(self, event):
 		self.populate_grid()		
+		self.populate_gear()
 
 	def OnSelectBattery(self, event):
 		self.batterySelected = self.batteries[event.GetSelection()]
@@ -332,8 +333,8 @@ class MainWindow(wx.Frame):
 			self.comboBoxSeason.Append(s)
 		self.comboBoxSeason.SetStringSelection(seasons[-1])
 
-		self.populate_gear()
 		self.populate_grid()
+		self.populate_gear()
 
 	def populate_gear(self):
 		self.batterySelected = None
@@ -378,10 +379,10 @@ class MainWindow(wx.Frame):
 
 		i = 0
 		start = None
-		end = None
 		oldSession = 0
 		c = 0
 		for d in list(reversed(data['data'])):
+
 			if d['session'] != oldSession:
 				self.grid.InsertRows(i, 1)
 				self.grid.SetCellValue(i, 0, str(d['date'][0:10]));
@@ -423,8 +424,6 @@ class MainWindow(wx.Frame):
 
 			self.grid.SetCellTextColour(i, 10, '#0000ff') 
 			self.grid.SetCellTextColour(i, 11, '#0000ff') 
-
-
 			c += 1
 			i += 1
 
@@ -556,7 +555,13 @@ class VBLogWindow(wx.Frame):
 
 		for row in data:
 			line = row['date'] + ' (' + str(row['severity']) + ') ' + row['message'] + "\n"
-			textarea.AppendText(line)
+
+			if row['severity'] == 4:
+				textarea.SetDefaultStyle(wx.TextAttr(wx.RED))
+			else:
+				textarea.SetDefaultStyle(wx.TextAttr(wx.BLACK))
+			textarea.WriteText(line)
+		textarea.SetInsertionPoint(0)
 
 		self.Show()
 

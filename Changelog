@@ -32,3 +32,7 @@ UI - Red if unable to zoom
 v2.7.0
 New way to find vcontrol (search for vcontrol.id on all drives)
 Convert vbar log to unicode before inserting
+Not red backgroud on "Gefaehrliche Vibrationen"
+flights by week graph works for seasons
+VBar log window show content without scrolling
+VBar log window have red text for severity 4

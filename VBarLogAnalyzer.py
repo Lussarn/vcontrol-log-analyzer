@@ -333,7 +333,7 @@ class Analyzer:
 			SELECT l.id, b.name as batteryname, m.name as modelname, l.date, l.duration, l.capacity, l.used, l.minvoltage, l.maxampere, l.uid, \
 			(select count(*) > 1 from vbarlog vbl WHERE l.id=vbl.logid) as havevbarlog, \
 			(select count(*) > 1 from uilog ul WHERE l.id=ul.logid) as haveuilog, \
-			(select count(*) > 1 from vbarlog vbl WHERE l.id=vbl.logid and (severity=4 and message not like '%Extreme Vibration%')) as havevbarlogproblem \
+			(select count(*) > 1 from vbarlog vbl WHERE l.id=vbl.logid and (severity=4 and (message not like '%Extreme Vibration%' AND message not like '%Gefaehrliche Vibrationen%'))) as havevbarlogproblem \
 			FROM batterylog l \
 			LEFT JOIN battery b on b.id=l.batteryid \
 			LEFT JOIN model m on m.id=l.modelid"
