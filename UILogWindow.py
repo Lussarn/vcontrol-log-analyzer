@@ -237,7 +237,6 @@ class UILogWindow(wx.Frame):
 		self.canvas.draw()
 		self.canvas.Refresh()
 
-
 	def make_patch_spines_invisible(self, ax):
 		ax.set_frame_on(True)
 		ax.patch.set_visible(False)
@@ -351,6 +350,8 @@ class UILogWindow(wx.Frame):
 
 	def OnResize(self, event):
 		self.background = None
+		self.canvas.draw()
+		self.canvas.Refresh()
 
 	# Param start, end are seconds
 	def updateMinMax(self, start, end):
