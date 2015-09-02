@@ -22,6 +22,15 @@ class UILogWindow(wx.Frame):
 
 		sizerMainVert = wx.BoxSizer(wx.VERTICAL)
 		self.figure.set_facecolor('white')
+
+		uiInfo = analyzer.extract_info_by_logid(logId)
+
+		info = uiInfo['model'] + " - " + uiInfo['battery'] + " (" + uiInfo['date'] + ")"
+		infoText = wx.StaticText(self, label=info, style=wx.ALIGN_CENTER | wx.ST_NO_AUTORESIZE)
+		infoText.SetFont(wx.Font(18, wx.DECORATIVE, wx.NORMAL, wx.NORMAL))
+		sizerMainVert.AddSpacer(10) 
+		sizerMainVert.Add(infoText, 0, wx.EXPAND)
+
 		sizerMainVert.Add(self.canvas, 1, wx.LEFT | wx.TOP | wx.GROW)
 		self.SetSizer(sizerMainVert)
 
@@ -114,8 +123,8 @@ class UILogWindow(wx.Frame):
 
 		# labels
 		self.graphs[-1].set_xlabel("Duration (sec)", fontsize='x-small')
-		self.graphs[0].set_ylabel("Voltage(I)", fontsize='x-small')
-		self.graphs[1].set_ylabel("Current(A)", fontsize='x-small')
+		self.graphs[0].set_ylabel("Voltage(U)", fontsize='x-small')
+		self.graphs[1].set_ylabel("Current(I)", fontsize='x-small')
 		self.graphs[2].set_ylabel("Power (W)", fontsize='x-small')
 		self.graphs[3].set_ylabel("Headspeed (RPM)", fontsize='x-small')
 		self.graphs[4].set_ylabel("PWM", fontsize='x-small')
@@ -211,7 +220,6 @@ class UILogWindow(wx.Frame):
 		sizerMainVert.Add((0,10))
 		self.SetBackgroundColour('white')
 
-
 		self.graphs[0].set_xlim(0, self.duration)
 
 		# matplot events
@@ -220,6 +228,7 @@ class UILogWindow(wx.Frame):
 		self.figure.canvas.mpl_connect('button_release_event', self.OnRelease)
 		self.figure.canvas.mpl_connect('resize_event', self.OnResize)
 
+		self.figure.tight_layout()
 		self.Show()
 		self.canvas.draw()
 		self.canvas.Refresh()

@@ -460,6 +460,24 @@ class Analyzer:
 		data['data'] = out
 		return data
 
+	def extract_info_by_logid(self, logId):
+		sql ="\
+			SELECT b.name as batteryname, m.name as modelname, l.date \
+			FROM batterylog l \
+			LEFT JOIN battery b on b.id=l.batteryid \
+			LEFT JOIN model m on m.id=l.modelid \
+			WHERE l.id=" + str(logId)
+
+		cur = self._db().cursor()
+		cur.execute(sql)
+		row = cur.fetchone()
+		info = {
+			'model': row[1],
+			'battery': row[0],
+			'date': row[2]
+		}
+		return info
+
 	def extract_ui(self, logId):
 		sql = "\
 			SELECT  model, date, ampere, voltage, usedcapacity, headspeed, pwm FROM uilog where logid=" + str(logId)
