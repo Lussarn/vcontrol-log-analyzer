@@ -22,4 +22,5 @@ exe = EXE(pyz,
           debug=False,
           strip=None,
           upx=True,
+          icon='assets/program.ico',
           console=True )
