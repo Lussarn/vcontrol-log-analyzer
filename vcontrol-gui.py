@@ -28,7 +28,7 @@ from VBLogWindow import VBLogWindow
 
 class MainWindow(wx.Frame):
 	def __init__(self):
-		self.analyzer = VBarLogAnalyzer.Analyzer()
+		self.analyzer = VBarLogAnalyzer.Analyzer(self.import_callback)
 		self.batteries = []
 		self.models = []
 		self.batterySelected = None
@@ -40,7 +40,7 @@ class MainWindow(wx.Frame):
 		w = int(Variable.get('gui-window-width', '1024'))
 		h = int(Variable.get('gui-window-height', '600'))
 
-		wx.Frame.__init__(self, None, title='VBar Control flight analyzer v2.6.0', size=(w, h))
+		wx.Frame.__init__(self, None, title='VBar Control flight analyzer v2.7.0', size=(w, h))
 		self.CreateStatusBar()
 
 		# Creating the menubar.
@@ -313,7 +313,7 @@ class MainWindow(wx.Frame):
 			return
 
 	def OnAbout(self,e):
-		dlg = wx.MessageDialog(self, "By Linus Larsson (linus.larsson@gmail.com)\n\nVBar log analyzer is in no way affiliated with Mikado\nor any of there products\n\nUse at your own risk",  "       VBar control log analyzer", wx.OK)
+		dlg = wx.MessageDialog(self, "By Linus Larsson (linus.larsson@gmail.com)\n\nVBar Control flight analyzer is in no way affiliated with Mikado\nor any of there products\n\n",  "          VBar Control flight analyzer", wx.OK)
 		dlg.ShowModal()
 		dlg.Destroy()
 
@@ -327,7 +327,9 @@ class MainWindow(wx.Frame):
 			dlg.Destroy()
 			return
 		self.SetStatusText('Importing from VBar Control, please wait...')
+		self.Disable()
 		self.analyzer.import_data()
+		self.Enable()
 
 		seasons = self.analyzer.get_seasons()
 		self.comboBoxSeason.Clear()
@@ -338,6 +340,11 @@ class MainWindow(wx.Frame):
 
 		self.populate_grid()
 		self.populate_gear()
+
+	def import_callback(self, str):
+		self.SetStatusText('Importing from VBar Control: ' + str)
+		wx.Yield()
+
 
 	def populate_gear(self):
 		self.batterySelected = None
@@ -546,6 +553,7 @@ class MainWindow(wx.Frame):
 			base_path = os.path.abspath(".")
 
 		return os.path.join(base_path, relative_path)
+
 
 
 

@@ -8,8 +8,9 @@ import re
 
 class Analyzer:
 
-	def __init__(self):
+	def __init__(self, import_callback = None):
 		self._conn = None
+		self.import_callback = import_callback
 
 	def _db(self):
 		if self._conn == None:
@@ -133,7 +134,14 @@ class Analyzer:
 				lines = f.readlines()
 			lines = [x.strip() for x in lines] 	
 
+			numLines = len(lines)
+
+			currentLine = 0
 			for line in lines:
+				currentLine += 1
+				self.status("Checking " + name + " (" + str(currentLine * 100 / numLines) + "%)")
+
+
 				cols = line.split(';')
 				if len(cols) < 8:
 					continue
@@ -194,6 +202,7 @@ class Analyzer:
 			# Open all vbar files and check if they need importing
 			vbarFiles = [ f for f in os.listdir(modelPath) if os.path.isfile(os.path.join(modelPath, f))  and ('_vbar.log' in f or '_vcp.log' in f or '_vplane.log' in f) ]
 			for vbarFile in vbarFiles:
+				self.status("Checking " + vbarFile)
 				# import the vbar file
 				with open(os.path.join(modelPath, vbarFile)) as f:
 					lines = f.readlines()
@@ -297,7 +306,7 @@ class Analyzer:
 
 	def _find_vcontrol_path(self):
 #		return '/tmp/dkc-vbar'
-		return 'c:\\users\\linus\\vc\\rainer'
+#		return 'c:\\users\\linus\\vc\\rainer'
 		if 'linux' in sys.platform:
 			drives=subprocess.Popen('mount', shell=True, stdout=subprocess.PIPE)
 			lines, err=drives.communicate()
@@ -519,3 +528,8 @@ class Analyzer:
 				'message': row[3]
 			})
 		return out
+
+	def status(self, str):
+		if self.import_callback == None:
+			return
+		self.import_callback(str)

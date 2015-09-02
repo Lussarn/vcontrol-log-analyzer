@@ -3,7 +3,7 @@ import wx
 class VBLogWindow(wx.Frame):
 	def __init__(self, logId, analyzer):
 		data = analyzer.extract_log(logId)
-		wx.Frame.__init__(self, None, title='VBar Control flight analyzer v2.6.0 - Log Id ' + logId, size=(1200, 700))
+		wx.Frame.__init__(self, None, title='VBar Control flight analyzer v2.7.0 - Log Id ' + logId, size=(1200, 700))
 
 		textarea = wx.TextCtrl(self, -1,
                                 style=wx.TE_MULTILINE|wx.BORDER_SUNKEN|wx.TE_READONLY|
