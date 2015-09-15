@@ -13,7 +13,7 @@ class UILogWindow(wx.Frame):
 		data = analyzer.extract_ui(logId)
 
 		labels = ['Voltage', 'Current', 'Power', 'Headspeed', 'PWM', 'Capacity']
-		colors = ["#1F77B4", "#2CA02C", "#8C564B", "#FF7F0E", "#D62728", "#9467BD"]
+		self.colors = ["#1F77B4", "#2CA02C", "#8C564B", "#FF7F0E", "#D62728", "#9467BD"]
 
 		wx.Frame.__init__(self, None, title='VBar Control flight analyzer v2.7.0 - Log Id ' + logId, size=(1200, 700))
 		self.figure = Figure()
@@ -38,66 +38,17 @@ class UILogWindow(wx.Frame):
 		self.axes.xaxis.grid(True)
 		self.axes.xaxis.grid(b=True, which='major', color='0.65',linestyle='-')
 
-		# Graph size
-		self.figure.subplots_adjust(left=0.19, right=0.81)
-
 		self.graphs = {}
 		# Subgraphs
 		self.graphs[-1] = self.axes
 		for i in xrange(0,6):
 			self.graphs[i] = self.graphs[-1].twinx()
 
-		# spines
-		self.graphs[0].spines["left"].set_position(("axes", -0.0))
-		self.graphs[0].yaxis.tick_left()
-		self.make_patch_spines_invisible(self.graphs[0])
-		self.graphs[0].yaxis.set_label_position('left');
-		self.graphs[0].spines["left"].set_visible(True)
-		self.graphs[0].spines["left"].set_color(colors[0])
-
-		self.graphs[1].spines["left"].set_position(("axes", -0.08))
-		self.graphs[1].yaxis.tick_left()
-		self.make_patch_spines_invisible(self.graphs[1])
-		self.graphs[1].yaxis.set_label_position('left');
-		self.graphs[1].spines["left"].set_visible(True)
-		self.graphs[1].spines["left"].set_color(colors[1])
-
-		self.graphs[2].spines["left"].set_position(("axes", -0.16))
-		self.graphs[2].yaxis.tick_left()
-		self.make_patch_spines_invisible(self.graphs[2])
-		self.graphs[2].yaxis.set_label_position('left');
-		self.graphs[2].spines["left"].set_visible(True)
-		self.graphs[2].spines["left"].set_color(colors[2])
-
-		self.make_patch_spines_invisible(self.graphs[3])
-		self.graphs[3].spines["right"].set_visible(True)
-		self.graphs[3].spines["right"].set_color(colors[3])
-
-		self.graphs[4].spines["right"].set_position(("axes", 1.08))
-		self.make_patch_spines_invisible(self.graphs[4])
-		self.graphs[4].spines["right"].set_visible(True)
-		self.graphs[4].spines["right"].set_color(colors[4])
-
-		self.graphs[5].spines["right"].set_position(("axes", 1.16))
-		self.make_patch_spines_invisible(self.graphs[5])
-		self.graphs[5].spines["right"].set_visible(True)
-		self.graphs[5].spines["right"].set_color(colors[5])
-
-		self.graphs[-1].spines['right'].set_color("#777777")
-		self.graphs[-1].spines['left'].set_color("#777777")
-		self.graphs[-1].spines['top'].set_color("#777777")
-		self.graphs[-1].spines['bottom'].set_color("#777777")
-		self.graphs[-1].get_yaxis().set_ticks([])
 
 		# data
 		self.data = {} 
-		self.data[-1] = []  # sec
-		self.data[3] = []   # rpm
-		self.data[1] = []   # current
-		self.data[0] = []   # voltage
-		self.data[4] = []   # PWM
-		self.data[5] = []   # capacity
-		self.data[2] = []   # power
+		for i in xrange(-1, 6):
+			self.data[i] = []  # sec
 		self.duration = 0
 		for row in data:
 			self.duration = row['sec']
@@ -112,7 +63,7 @@ class UILogWindow(wx.Frame):
 		# plots
 		self.plots = {}
 		for i in xrange(0, 6):
-			self.plots[i], = self.graphs[i].plot(self.data[-1], self.data[i], colors[i], linewidth=0.5)
+			self.plots[i], = self.graphs[i].plot(self.data[-1], self.data[i], self.colors[i], linewidth=0.5)
 
 		# scale graphs
 		self.graphs[0].set_ylim(0, max(self.data[0]) * 1.7)
@@ -127,7 +78,7 @@ class UILogWindow(wx.Frame):
 		self.graphs[1].set_ylabel("Current(I)", fontsize='x-small')
 		self.graphs[2].set_ylabel("Power (W)", fontsize='x-small')
 		self.graphs[3].set_ylabel("Headspeed (RPM)", fontsize='x-small')
-		self.graphs[4].set_ylabel("PWM", fontsize='x-small')
+		self.graphs[4].set_ylabel("PWM (%)", fontsize='x-small')
 		self.graphs[5].set_ylabel("Used capacity (mAh)", fontsize='x-small')
 
 		# colors and locators
@@ -158,7 +109,7 @@ class UILogWindow(wx.Frame):
 			s1.AddStretchSpacer(1)
 			s1.Add(self.valueOnCheck[i], 0)
 			t1 = wx.StaticText(p1, label=labels[i])
-			t1.SetForegroundColour(colors[i])
+			t1.SetForegroundColour(self.colors[i])
 			s1.Add(t1, 0)
 			s1.AddStretchSpacer(1)
 			gs.Add(p1, 1, wx.EXPAND)
@@ -221,6 +172,7 @@ class UILogWindow(wx.Frame):
 		self.SetBackgroundColour('white')
 
 		self.graphs[0].set_xlim(0, self.duration)
+		self.spines()
 
 		# matplot events
 		self.figure.canvas.mpl_connect('motion_notify_event', self.OnMotion)
@@ -228,14 +180,54 @@ class UILogWindow(wx.Frame):
 		self.figure.canvas.mpl_connect('button_release_event', self.OnRelease)
 		self.figure.canvas.mpl_connect('resize_event', self.OnResize)
 
-		self.figure.tight_layout()
 		self.Show()
-		self.canvas.draw()
-		self.canvas.Refresh()
 		for i in xrange(0,6):
 			self.graphs[i].set_visible(self.valueOnCheck[i].IsChecked());
 		self.canvas.draw()
 		self.canvas.Refresh()
+
+	def spines(self):
+		spinesData = {
+			0: { 'pos': 'left' }, # Voltage
+			1: { 'pos': 'left' }, # Current
+			2: { 'pos': 'left' }, # Power
+			3: { 'pos': 'right' }, # Headspeed
+			4: { 'pos': 'right' }, # PWM
+			5: { 'pos': 'right' }, # Capacity
+		}
+
+		# spines
+		self.graphs[-1].spines['right'].set_color("#777777")
+		self.graphs[-1].spines['left'].set_color("#777777")
+		self.graphs[-1].spines['top'].set_color("#777777")
+		self.graphs[-1].spines['bottom'].set_color("#777777")
+		self.graphs[-1].get_yaxis().set_ticks([])
+
+		space = 0.08
+		left  = space
+		right = 1.0 - space
+
+		for i in xrange(0,6):
+			if self.valueOnCheck[i].IsChecked():
+				pos = spinesData[i]['pos']
+				if pos == 'left':
+					left -= space
+					self.graphs[i].spines["left"].set_position(("axes", left))
+					self.graphs[i].yaxis.tick_left()
+				else:
+					right += space
+					self.graphs[i].spines["right"].set_position(("axes", right))
+					self.graphs[i].yaxis.tick_right()
+
+				self.make_patch_spines_invisible(self.graphs[i])
+				self.graphs[i].spines[pos].set_visible(True)
+				self.graphs[i].spines[pos].set_color(self.colors[i])
+				self.graphs[i].yaxis.set_label_position(pos);
+
+		self.figure.subplots_adjust(
+			left= -left / 1.7 + space, 
+			right= 1 - (right - 1) / 1.7 - space, 
+			top=0.97, bottom=0.09)
 
 	def make_patch_spines_invisible(self, ax):
 		ax.set_frame_on(True)
@@ -251,6 +243,8 @@ class UILogWindow(wx.Frame):
 				Variable.set('ui-show-value-' + str(i), '1');
 			else:
 				Variable.set('ui-show-value-' + str(i), '0');
+
+		self.spines()
 
 		self.canvas.draw()
 		self.canvas.Refresh()

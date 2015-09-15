@@ -305,8 +305,8 @@ class Analyzer:
 					continue
 
 	def _find_vcontrol_path(self):
-#		return '/tmp/dkc-vbar'
-#		return 'c:\\users\\linus\\vc\\rainer'
+#		return '/tmp/dkc-vb1'
+#		return 'c:\\users\\linus\\vc\\vb1'
 		if 'linux' in sys.platform:
 			drives=subprocess.Popen('mount', shell=True, stdout=subprocess.PIPE)
 			lines, err=drives.communicate()
@@ -323,16 +323,23 @@ class Analyzer:
 			if lines.find(' /Volumes/VControl ') >= 0:
 				path = '/Volumes/VControl'
 		elif 'win' in sys.platform:
-			import win32api
+			import ctypes
+			import time
+#		start = int(round(time.time() * 1000))
+			bitmask = ctypes.windll.kernel32.GetLogicalDrives()
 
 			path = None
-			drives = win32api.GetLogicalDriveStrings()
-			drives = drives.split('\000')[:-1]
-			for drive in drives:
-				if os.path.isfile(drive + 'vcontrol.id'):
-					path = drive;
-					break;
-
+			for i in xrange(26):
+				bit = 2 ** i
+				if bit & bitmask:
+					drive_letter = '%s:' % chr(65 + i)
+					drive_type = ctypes.windll.kernel32.GetDriveTypeA('%s\\' % drive_letter)
+					if (drive_type == 2): # Removable
+						if os.path.isfile(drive_letter + '\\vcontrol.id'):
+							path = drive_letter
+							break
+#		end = int(round(time.time() * 1000))
+#		print "scan time: " + str(end - start) + 'ms'
 		return path
 
 	def vcontrol_is_connected(self):
