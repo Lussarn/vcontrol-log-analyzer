@@ -15,7 +15,7 @@ class UILogWindow(wx.Frame):
 		labels = ['Voltage', 'Current', 'Power', 'Headspeed', 'PWM', 'Capacity']
 		self.colors = ["#1F77B4", "#2CA02C", "#8C564B", "#FF7F0E", "#D62728", "#9467BD"]
 
-		wx.Frame.__init__(self, None, title='VBar Control flight analyzer v2.7.0 - Log Id ' + logId, size=(1200, 700))
+		wx.Frame.__init__(self, None, title='VBar Control flight analyzer v2.7.1 - Log Id ' + logId, size=(1200, 700))
 		self.figure = Figure()
 		self.axes = self.figure.add_subplot(111)
 		self.canvas = FigureCanvas(self, -1, self.figure)
