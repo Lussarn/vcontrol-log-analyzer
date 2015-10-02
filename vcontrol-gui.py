@@ -40,7 +40,7 @@ class MainWindow(wx.Frame):
 		w = int(Variable.get('gui-window-width', '1024'))
 		h = int(Variable.get('gui-window-height', '600'))
 
-		wx.Frame.__init__(self, None, title='VBar Control flight analyzer v2.7.1', size=(w, h))
+		wx.Frame.__init__(self, None, title='VBar Control flight analyzer v2.7.2', size=(w, h))
 		self.CreateStatusBar()
 
 		# Creating the menubar.

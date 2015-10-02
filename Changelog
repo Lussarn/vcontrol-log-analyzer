@@ -44,6 +44,9 @@ Maximize doesn't make the pointer in the UI graph a paint program
 Added new icon to program
 Changed Windows exe filename
 
-v2.8.0
+v2.7.1
 UI graph changes size with number of values shown
 Percent unit on PWM in UI log
+
+v2.7.2
+Hotfix for import vbar log, don't import if tuples != 3

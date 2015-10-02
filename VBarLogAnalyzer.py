@@ -232,6 +232,8 @@ class Analyzer:
 						break
 
 					cols = line.split(';')
+					if len(cols) != 3:
+						continue
 					hour = cols[0][:2]
 					# Rollover on date
 					if (lastHour == '23' and hour == '00'):
