@@ -1,13 +1,33 @@
 # -*- mode: python -*-
-a = Analysis(['vcontrol-gui.py'],
-             pathex=['C:\\Users\\Linus\\Desktop\\python\\vcontrol-log-analyzer'],
+
+##### include mydir in distribution #######
+def extra_datas(mydir):
+    def rec_glob(p, files):
+        import os
+        import glob
+        for d in glob.glob(p):
+            if os.path.isfile(d):
+                files.append(d)
+            rec_glob("%s/*" % d, files)
+    files = []
+    rec_glob("%s/*" % mydir, files)
+    extra_datas = []
+    print files
+    for f in files:
+        extra_datas.append((f, f, 'DATA'))
+
+    return extra_datas
+###########################################
+
+a = Analysis(['src/vcontrol-gui.py'],
+             pathex=['./src'],
              hiddenimports=[],
              hookspath=None,
              runtime_hooks=None)
-a.datas += [
-  ('assets/img/ball-green.png', 'C:\\Users\\Linus\\Desktop\\python\\vcontrol-log-analyzer\\assets\\img\\ball-green.png','DATA'),
-  ('assets/img/ball-red.png', 'C:\\Users\\Linus\\Desktop\\python\\vcontrol-log-analyzer\\assets\\img\\ball-red.png','DATA')
-]
+
+a.datas += extra_datas('assets')
+a.datas += extra_datas('locale')
+
 for d in a.datas:
     if 'pyconfig' in d[0]: 
         a.datas.remove(d)

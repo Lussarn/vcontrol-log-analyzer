@@ -1,0 +1,276 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR ORGANIZATION
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"POT-Creation-Date: 2015-09-17 15:26+0200\n"
+"PO-Revision-Date: 2015-09-17 15:26+0200\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: de\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: pygettext.py 1.5\n"
+"X-Generator: Poedit 1.8.4\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: MainWindow.py:48
+msgid "Import from VBar Control"
+msgstr ""
+
+#: MainWindow.py:49
+#, fuzzy
+msgid "About flight analyzer"
+msgstr "Über flight analzyer"
+
+#: MainWindow.py:49
+msgid "Information about VBar Control flight analyzer"
+msgstr "Information über VBar Control flight analyzer"
+
+#: MainWindow.py:50
+msgid "Exit"
+msgstr "Beenden"
+
+#: MainWindow.py:50
+msgid "Terminate the program"
+msgstr "Beenden flight analyzer"
+
+#: MainWindow.py:51
+msgid "File"
+msgstr "Datei"
+
+#: MainWindow.py:72
+msgid "Season"
+msgstr "Saison"
+
+#: MainWindow.py:73 MainWindow.py:320 MainWindow.py:365
+msgid "All seasons"
+msgstr "Alle saison"
+
+#: MainWindow.py:82 MainWindow.py:111 MainWindow.py:182
+msgid "Battery"
+msgstr "Batterie"
+
+#: MainWindow.py:92 MainWindow.py:110 MainWindow.py:183
+msgid "Model"
+msgstr "Modell"
+
+#: MainWindow.py:109
+msgid "Stack graph as"
+msgstr ""
+
+#: MainWindow.py:124
+msgid "Show logs"
+msgstr ""
+
+#: MainWindow.py:125
+msgid "Only more than 1/4 capacity used"
+msgstr ""
+
+#: MainWindow.py:126
+msgid "All logs"
+msgstr ""
+
+#: MainWindow.py:148
+msgid "Connection status"
+msgstr ""
+
+#: MainWindow.py:163
+msgid "Data"
+msgstr ""
+
+#: MainWindow.py:181
+msgid "Date"
+msgstr ""
+
+#: MainWindow.py:184 MainWindow.py:432
+msgid "Duration"
+msgstr ""
+
+#: MainWindow.py:185 UILogWindow.py:17
+msgid "Capacity"
+msgstr "Kapazität"
+
+#: MainWindow.py:186
+msgid "Used"
+msgstr ""
+
+#: MainWindow.py:187
+msgid "MinV"
+msgstr ""
+
+#: MainWindow.py:188
+msgid "MaxA"
+msgstr ""
+
+#: MainWindow.py:189
+msgid "IdleV"
+msgstr ""
+
+#: MainWindow.py:190
+msgid "VBLog"
+msgstr ""
+
+#: MainWindow.py:191
+msgid "UILog"
+msgstr ""
+
+#: MainWindow.py:202
+msgid "Graph"
+msgstr ""
+
+#: MainWindow.py:284 MainWindow.py:403 MainWindow.py:404
+msgid "Show"
+msgstr ""
+
+#: MainWindow.py:309
+msgid "Unable to find VBar Control"
+msgstr ""
+
+#: MainWindow.py:309
+msgid "VBar Control message"
+msgstr ""
+
+#: MainWindow.py:313
+msgid "Importing from VBar Control, please wait..."
+msgstr ""
+
+#: MainWindow.py:329
+msgid "Importing from VBar Control"
+msgstr ""
+
+#: MainWindow.py:341
+msgid "All batteries"
+msgstr ""
+
+#: MainWindow.py:351
+msgid "All models"
+msgstr ""
+
+#: MainWindow.py:432
+msgid "Sessions"
+msgstr ""
+
+#: MainWindow.py:432
+msgid "Used capacity"
+msgstr ""
+
+#: MainWindow.py:432 WeekGraph.py:31
+msgid "Cycles"
+msgstr ""
+
+#: Screenshot.py:14 Screenshot.py:20
+msgid "Screenshot"
+msgstr ""
+
+#: Screenshot.py:25
+msgid "Image max size"
+msgstr ""
+
+#: Screenshot.py:30
+msgid "No scaling"
+msgstr ""
+
+#: Screenshot.py:31 Screenshot.py:32 Screenshot.py:33 Screenshot.py:34
+#: Screenshot.py:35 Screenshot.py:36 Screenshot.py:37
+msgid "width"
+msgstr ""
+
+#: Screenshot.py:53
+msgid "Save image"
+msgstr ""
+
+#: Screenshot.py:55
+msgid "Cancel"
+msgstr ""
+
+#: Screenshot.py:114
+msgid "Error"
+msgstr ""
+
+#: Screenshot.py:114
+msgid "Unable to save screenshot"
+msgstr ""
+
+#: UILogWindow.py:17
+msgid "Current"
+msgstr "Strom"
+
+#: UILogWindow.py:17
+msgid "Headspeed"
+msgstr "drehzahl"
+
+#: UILogWindow.py:17
+msgid "PWM"
+msgstr ""
+
+#: UILogWindow.py:17
+msgid "Power"
+msgstr "Leistung"
+
+#: UILogWindow.py:17
+msgid "Voltage"
+msgstr "Spannung"
+
+#: UILogWindow.py:79
+msgid "Duration (sec)"
+msgstr ""
+
+#: UILogWindow.py:80
+msgid "Voltage (U)"
+msgstr "Strom (U)"
+
+#: UILogWindow.py:81
+msgid "Current (I)"
+msgstr "Spannung (I)"
+
+#: UILogWindow.py:82
+msgid "Power (W)"
+msgstr "Leistung (W)"
+
+#: UILogWindow.py:83
+msgid "Headspeed (RPM)"
+msgstr "drehzahl  (RPM)"
+
+#: UILogWindow.py:84
+msgid "PWM (%)"
+msgstr "PWM (%)"
+
+#: UILogWindow.py:85
+msgid "Used capacity (mAh)"
+msgstr "Benutzt Kapazität"
+
+#: UILogWindow.py:142
+msgid "Mouse"
+msgstr "Maus"
+
+#: UILogWindow.py:149
+msgid "Min"
+msgstr ""
+
+#: UILogWindow.py:161
+msgid "Max"
+msgstr ""
+
+#: UILogWindow.py:173
+msgid "Average"
+msgstr "Durchschnitt"
+
+#: VBarLogAnalyzer.py:125
+msgid "VControl path not found, mounted?"
+msgstr ""
+
+#: VBarLogAnalyzer.py:142 VBarLogAnalyzer.py:204
+msgid "Checking"
+msgstr "Überprüfung"
+
+#: WeekGraph.py:20
+msgid "Cycles / week"
+msgstr ""
+
+#: WeekGraph.py:33
+msgid "Week"
+msgstr ""

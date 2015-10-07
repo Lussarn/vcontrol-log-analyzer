@@ -47,6 +47,20 @@ Changed Windows exe filename
 v2.7.1
 UI graph changes size with number of values shown
 Percent unit on PWM in UI log
+New scanning for VControl
+UI graph changes size with number of values shown
+Percent unit on PWM in UI log
 
 v2.7.2
 Hotfix for import vbar log, don't import if tuples != 3
+
+v3.0.0
+Splited MainWindow, resource_path, weekgraph, global vars to own files
+Updated pyinstaller buildfile to only use relative pathes
+Cleanup of weekly flight graph
+Screenshot of UI graph
+Model info window with image
+Screenshot of model info window
+New about dialog
+Only show relevant model on a season
+Text to flight log entries

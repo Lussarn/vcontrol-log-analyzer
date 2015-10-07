@@ -1,0 +1,290 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR ORGANIZATION
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"POT-Creation-Date: 2015-09-17 15:26+0200\n"
+"PO-Revision-Date: 2015-09-17 15:26+0200\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: sv\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: pygettext.py 1.5\n"
+"X-Generator: Poedit 1.8.4\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: MainWindow.py:48
+msgid "Import from VBar Control"
+msgstr "Importera från VBar Control"
+
+#: MainWindow.py:49
+msgid "About flight analyzer"
+msgstr "Om flight analyzer"
+
+#: MainWindow.py:49
+msgid "Information about VBar Control flight analyzer"
+msgstr "Information om VBar Control flight analyzer"
+
+#: MainWindow.py:50
+msgid "Exit"
+msgstr "Avsluta"
+
+#: MainWindow.py:50
+msgid "Terminate the program"
+msgstr "Avsluta programmet"
+
+#: MainWindow.py:51
+msgid "File"
+msgstr "Fil"
+
+#: MainWindow.py:72
+msgid "Season"
+msgstr "Sässong"
+
+#: MainWindow.py:73 MainWindow.py:320 MainWindow.py:365
+msgid "All seasons"
+msgstr "Alla sässonger"
+
+#: MainWindow.py:82 MainWindow.py:111 MainWindow.py:182
+msgid "Battery"
+msgstr "Batteri"
+
+#: MainWindow.py:92 MainWindow.py:110 MainWindow.py:183
+msgid "Model"
+msgstr "Modell"
+
+#: MainWindow.py:109
+msgid "Stack graph as"
+msgstr "Visa graph som"
+
+#: MainWindow.py:124
+msgid "Show logs"
+msgstr "Visa loggar"
+
+#: MainWindow.py:125
+msgid "Only more than 1/4 capacity used"
+msgstr "Bara mer än 1/4 kapacitet använd"
+
+#: MainWindow.py:126
+msgid "All logs"
+msgstr "Alla loggar"
+
+#: MainWindow.py:148
+msgid "Connection status"
+msgstr "Anslutningsstatus"
+
+#: MainWindow.py:163
+msgid "Data"
+msgstr "Data"
+
+#: MainWindow.py:181
+msgid "Date"
+msgstr "Datum"
+
+#: MainWindow.py:184 MainWindow.py:432
+msgid "Duration"
+msgstr "Tid"
+
+#: MainWindow.py:185 UILogWindow.py:17
+msgid "Capacity"
+msgstr "Kapacitet"
+
+#: MainWindow.py:186
+msgid "Used"
+msgstr "Använt"
+
+#: MainWindow.py:187
+msgid "MinV"
+msgstr ""
+
+#: MainWindow.py:188
+msgid "MaxA"
+msgstr ""
+
+#: MainWindow.py:189
+msgid "IdleV"
+msgstr ""
+
+#: MainWindow.py:190
+msgid "VBLog"
+msgstr ""
+
+#: MainWindow.py:191
+msgid "UILog"
+msgstr ""
+
+#: MainWindow.py:202
+msgid "Graph"
+msgstr "Graf"
+
+#: MainWindow.py:284 MainWindow.py:403 MainWindow.py:404
+msgid "Show"
+msgstr "Visa"
+
+#: MainWindow.py:309
+msgid "Unable to find VBar Control"
+msgstr "Kan inte finna VBar Control"
+
+#: MainWindow.py:309
+msgid "VBar Control message"
+msgstr "VBar Control medellande"
+
+#: MainWindow.py:313
+msgid "Importing from VBar Control, please wait..."
+msgstr "Importerar från VBar kontroll, var god vänta..."
+
+#: MainWindow.py:329
+msgid "Importing from VBar Control"
+msgstr "Importerar från VBar Control"
+
+#: MainWindow.py:341
+msgid "All batteries"
+msgstr "Alla batterier"
+
+#: MainWindow.py:351
+msgid "All models"
+msgstr "Alla modeller"
+
+#: MainWindow.py:432
+msgid "Sessions"
+msgstr "Sessioner"
+
+#: MainWindow.py:432
+msgid "Used capacity"
+msgstr "Använd kapacitet"
+
+#: MainWindow.py:432 WeekGraph.py:31
+msgid "Cycles"
+msgstr "Cykler"
+
+#: Screenshot.py:14 Screenshot.py:20
+msgid "Screenshot"
+msgstr "Skärmavbild"
+
+#: Screenshot.py:25
+msgid "Image max size"
+msgstr "Max bildstorlek"
+
+#: Screenshot.py:30
+msgid "No scaling"
+msgstr "Ingen skalning"
+
+#: Screenshot.py:31 Screenshot.py:32 Screenshot.py:33 Screenshot.py:34
+#: Screenshot.py:35 Screenshot.py:36 Screenshot.py:37
+msgid "width"
+msgstr "bredd"
+
+#: Screenshot.py:53
+msgid "Save image"
+msgstr "Spara bild"
+
+#: Screenshot.py:55
+msgid "Cancel"
+msgstr "Avbryt"
+
+#: Screenshot.py:114
+msgid "Error"
+msgstr "Fel"
+
+#: Screenshot.py:114
+msgid "Unable to save screenshot"
+msgstr "Kunde inte spara skärmavbild"
+
+#: UILogWindow.py:17
+msgid "Current"
+msgstr "Ström"
+
+#: UILogWindow.py:17
+msgid "Headspeed"
+msgstr "Varvtal"
+
+#: UILogWindow.py:17
+msgid "PWM"
+msgstr "PWM"
+
+#: UILogWindow.py:17
+msgid "Power"
+msgstr "Kraft"
+
+#: UILogWindow.py:17
+msgid "Voltage"
+msgstr "Spänning"
+
+#: UILogWindow.py:79
+msgid "Duration (sec)"
+msgstr "Tid (sec)"
+
+#: UILogWindow.py:80
+msgid "Voltage (U)"
+msgstr "Spänning (U)"
+
+#: UILogWindow.py:81
+msgid "Current (I)"
+msgstr "Ström (I)"
+
+#: UILogWindow.py:82
+msgid "Power (W)"
+msgstr "Kraft (W)"
+
+#: UILogWindow.py:83
+msgid "Headspeed (RPM)"
+msgstr "Varvtal (RPM)"
+
+#: UILogWindow.py:84
+msgid "PWM (%)"
+msgstr "PWM (%)"
+
+#: UILogWindow.py:85
+msgid "Used capacity (mAh)"
+msgstr "Använd kapacitet (mAh)"
+
+#: UILogWindow.py:142
+msgid "Mouse"
+msgstr "Mus"
+
+#: UILogWindow.py:149
+msgid "Min"
+msgstr ""
+
+#: UILogWindow.py:161
+msgid "Max"
+msgstr ""
+
+#: UILogWindow.py:173
+msgid "Average"
+msgstr "Medel"
+
+#: VBarLogAnalyzer.py:125
+msgid "VControl path not found, mounted?"
+msgstr "VControl sökväg ej funnen, ansluten?"
+
+#: VBarLogAnalyzer.py:142 VBarLogAnalyzer.py:204
+msgid "Checking"
+msgstr "Kontrollerar"
+
+#: WeekGraph.py:20
+msgid "Cycles / week"
+msgstr "Cykler / Vecka"
+
+#: WeekGraph.py:33
+msgid "Week"
+msgstr "Vecka"
+
+#~ msgid "Week number"
+#~ msgstr "Veckonummer"
+
+#~ msgid "Data view"
+#~ msgstr "Data vy"
+
+#~ msgid "Graph view"
+#~ msgstr "Graf vy"
+
+#~ msgid "Voltage(U)"
+#~ msgstr "Spänning(U)"
+
+#~ msgid "Importing from VBar Control: "
+#~ msgstr "Importerar från VBar Control:"

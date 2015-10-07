@@ -1,7 +1,8 @@
 #!/usr/bin/python
 
 import sys
-import VBarLogAnalyzer
+import vc.backend
+import vc.globals
 
 def usage():
 	print "vcontrol-cli.py --help                            This help"
@@ -14,16 +15,16 @@ def usage():
 	print "                   [end=YYYY-MM-DD]"
 
 def list_gear():
-	analyzer = VBarLogAnalyzer.Analyzer()
-	gear = analyzer.list_gear()
+	analyzer = vc.backend.Analyzer()
+	gear = analyzer.get_gear()
 
 	print "Batteries:"
 	for idbattery in gear['batteries']:
-		print '   id:',idbattery, ' name: ',gear['batteries'][idbattery]
+		print '   id:',idbattery, ' name: ',gear['batteries'][idbattery]['name']
 
 	print "Models:"
 	for idmodel in gear['models']:
-		print '   id:',idmodel, ' name: ',gear['models'][idmodel]
+		print '   id:',idmodel, ' name: ',gear['models'][idmodel]['name']
 
 
 def extract():
@@ -63,9 +64,9 @@ def extract():
 			print "Unknown extract parameter:",ar[0]
 			exit(1);
 
-	analyzer = VBarLogAnalyzer.Analyzer()
+	analyzer = vc.backend.Analyzer()
 
-	data = analyzer.extract(batteryid=batteryid, modelid=modelid, start=start, end=end)
+	data = analyzer.extract(battery_id=batteryid, model_id=modelid, start_date=start, end_date=end)
 
 	header  = "+-------+---------------------+---------------------+---------------------+----------+----------+-------------+-------+-------+-------+-------+-------+"
 	header2 = "+-----------------------------+-------------------------------------------+-----------------------------------+---------------------------------------+"
@@ -108,7 +109,7 @@ def extract():
 	print header2
 
 def import_data():
-	analyzer = VBarLogAnalyzer.Analyzer()
+	analyzer = vc.backend.Analyzer()
 	if analyzer.vcontrol_is_connected() == False:
 		print "Error: No VBar Control found"
 		exit(1)
@@ -145,7 +146,7 @@ def main():
 	elif command == '--help':
 		usage()
 	elif command == '--version':
-		print "vcontrol-cli v2.7.2"
+		print "vcontrol-cli " + vc.globals.VERSION
 	else:
 		usage()
 
