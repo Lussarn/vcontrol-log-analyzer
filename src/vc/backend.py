@@ -65,8 +65,7 @@ class Analyzer:
             if row["name"] == "image":
                 found = True
 
-        found = True
-        if (found == False):
+        if not found:
             print "Adding type, image, thumb, info fields to model table"
             cur = self._conn.cursor()
             cur.execute("ALTER TABLE model ADD type VARCHAR(20)");
