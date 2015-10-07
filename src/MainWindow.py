@@ -551,7 +551,7 @@ class MainWindow(wx.Frame):
                             break
 
                 if reload:
-                    self._grid.InsertRows(row_index, 2)
+                    self._grid.InsertRows(row_index, 1)
 
                 self._grid.SetCellRenderer(
                     row_index, 
