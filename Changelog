@@ -64,3 +64,6 @@ Screenshot of model info window
 New about dialog
 Only show relevant model on a season
 Text to flight log entries
+
+v3.0.1
+Fixed swithed model/battery in weekly graph
