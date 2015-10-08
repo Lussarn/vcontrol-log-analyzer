@@ -623,8 +623,8 @@ class MainWindow(wx.Frame):
         self._week_graph.update(
             start_date=start_date, 
             end_date=end_date, 
-            battery_id=self._model_selected, 
-            model_id=self._battery_selected,
+            model_id=self._model_selected,
+            battery_id=self._battery_selected, 
             stack_as=self._stack_weekly_graph_as
         )
 
