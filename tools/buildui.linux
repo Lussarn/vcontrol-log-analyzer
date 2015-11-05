@@ -1,0 +1,6 @@
+pyside-uic qtui/main_window.ui -o src/qtui/QTDMainWindow.py
+pyside-uic qtui/telemetry_window.ui -o src/qtui/QTDTelemetryWindow.py
+pyside-uic qtui/screenshot_dialog.ui -o src/qtui/QTDScreenshotDialog.py
+pyside-uic qtui/model_window.ui -o src/qtui/QTDModelWindow.py
+pyside-uic qtui/log_window.ui -o src/qtui/QTDLogWindow.py
+pyside-uic qtui/about_dialog.ui -o src/qtui/QTDAboutDialog.py

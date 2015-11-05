@@ -67,3 +67,6 @@ Text to flight log entries
 
 v3.0.1
 Fixed swithed model/battery in weekly graph
+
+v4.0.0
+Switch to QT

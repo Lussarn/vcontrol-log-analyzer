@@ -13,8 +13,8 @@ import time
 import sys
 import subprocess
 import re
-import wx
 import StringIO
+from PySide import QtCore, QtGui
 
 import vc.util
 
@@ -34,7 +34,13 @@ class Analyzer:
         for new functionality
         """
         if self._conn == None:
-            self._conn = sqlite3.connect(os.path.join(os.path.expanduser("~"), '.vcontrol.db'))
+            if vc.globals.OS == "windows" :
+                from win32com.shell import shell,shellcon
+                home = shell.SHGetFolderPath(0, shellcon.CSIDL_PROFILE, None, 0)
+            else:
+                home = os.path.expanduser("~")
+
+            self._conn = sqlite3.connect(os.path.join(home, '.vcontrol.db'))
             self._conn.row_factory = vc.util.sqlite_dict_factory
         else:
             return self._conn
@@ -154,7 +160,7 @@ class Analyzer:
             self._db().commit()
         return id;
 
-    def get_gear(self, start_date, end_date):
+    def get_gear(self, start_date, end_date, factor=1):
         """
         Returns gear (models and batteries ) used beetween two dates
 
@@ -179,16 +185,16 @@ class Analyzer:
                     'thumb' : row["thumb"],
                     'info' : info
             })
-            if row["thumb"] == None:
+            if row["thumb"] is None:
                 if row["type"] == "AIRPLANE":
-                    bitmap = wx.Bitmap(vc.util.resource_path('assets/img/icon-airplane.png'), wx.BITMAP_TYPE_ANY)
+                    bitmap = vc.util.load_pixmap("airplane.png", factor)
                 elif row["type"] == "MULTIROTOR":
-                    bitmap = wx.Bitmap(vc.util.resource_path('assets/img/icon-multirotor.png'), wx.BITMAP_TYPE_ANY)
+                    bitmap = vc.util.load_pixmap("multirotor.png", factor)
                 else:
-                    bitmap = wx.Bitmap(vc.util.resource_path('assets/img/icon-helicopter.png'), wx.BITMAP_TYPE_ANY)
+                    bitmap = vc.util.load_pixmap("helicopter.png", factor)
             else:
-                stream = StringIO.StringIO(row["thumb"])
-                bitmap = wx.BitmapFromImage(wx.ImageFromStream(stream))
+                bitmap = QtGui.QPixmap.fromImage(QtGui.QImage.fromData(str(row["thumb"])))
+                bitmap = bitmap.scaledToHeight(bitmap.height() * factor / 2.0, QtCore.Qt.SmoothTransformation)
             gear['models'][len(gear['models']) - 1]['thumb'] = bitmap
         return gear
 
@@ -201,7 +207,7 @@ class Analyzer:
         vcontrol_path = self._find_vcontrol_path()
         battery_path = os.path.join(vcontrol_path, 'battery')
         if not os.path.isdir(battery_path):
-            self.error = _("VControl path not found, mounted?").decode("utf8")
+            self.error = "VControl path not found, mounted?"
             return False
 
         battery_dirs = [ os.path.join(battery_path,f) for f in os.listdir(battery_path) if os.path.isdir(os.path.join(battery_path,f)) and os.path.exists(os.path.join(battery_path, f, 'name')) ]
@@ -214,7 +220,7 @@ class Analyzer:
             lines = [x.strip() for x in lines] 	
 
             for line_count, line in enumerate(lines):
-                self.status(_("Checking").decode('utf8') + " " + name + " (" + str((line_count + 1) * 100 / len(lines)) + "%)")
+                self.status("Checking" + " " + name + " (" + str((line_count + 1) * 100 / len(lines)) + "%)")
 
                 cols = line.split(';')
                 if len(cols) < 8:
@@ -281,7 +287,7 @@ class Analyzer:
         for model_path in [ os.path.join(log_path, f) for f in os.listdir(log_path) if os.path.isdir(os.path.join(log_path, f)) ]:
             # Open all vbar files and check if they need importing
             for vbar_filename in [ f for f in os.listdir(model_path) if os.path.isfile(os.path.join(model_path, f))  and ('_vbar.log' in f or '_vcp.log' in f or '_vplane.log' in f) ]:
-                self.status(_("Checking").decode("utf8") + " " + vbar_filename)
+                self.status("Checking" + " " + vbar_filename)
                 # import the vbar file
                 with open(os.path.join(model_path, vbar_filename)) as f:
                     lines = f.readlines()
@@ -393,24 +399,35 @@ class Analyzer:
     Find and return the vcontrol path, if connected
     """
     def _find_vcontrol_path(self):
-#        return '/tmp/dkc-vb1'
-#        return 'c:\\users\\linus\\vc\\ddd'
-        if 'linux' in sys.platform:
-            drives = subprocess.Popen('mount', shell=True, stdout=subprocess.PIPE)
-            lines, err = drives.communicate()
-            words = lines.split()
+        if vc.globals.OS == "linux":
+            import pyudev, codecs
             path = None
-            for word in words:
-                if word.find('/VControl') >= 0:
-                    path = word
+            context = pyudev.Context()
+            for device in context.list_devices(subsystem='block'):
+                dev_node = device.device_node
+
+                mountpoint = None
+                for mount in codecs.open('/proc/mounts'):
+                    dev, mp, fstype = mount.split()[:3]
+                    if dev.decode('ascii') == dev_node:
+                        mountpoint = mp.decode('unicode_escape')
+                        break
+                if mountpoint is None:
+                    continue
+                if os.path.isfile(mountpoint + "/vcontrol.id"):
+                    path = mountpoint
                     break
-        elif 'darwin' in sys.platform:
-            list_drives=subprocess.Popen('mount', shell=True, stdout=subprocess.PIPE)
-            lines, err=list_drives.communicate()
+
+        elif vc.globals.OS == "osx":
+            volumes = os.listdir("/Volumes")
             path = None
-            if lines.find(' /Volumes/VControl ') >= 0:
-                path = '/Volumes/VControl'
-        elif 'win' in sys.platform:
+            for volume in volumes:
+                path_test = os.path.join("/Volumes", volume)
+                if os.path.isfile(os.path.join(path_test, "vcontrol.id")):
+                    path = path_test
+                    break
+
+        elif vc.globals.OS == "windows":
             import ctypes
             import time
             bitmask = ctypes.windll.kernel32.GetLogicalDrives()
@@ -683,8 +700,7 @@ class Analyzer:
             info = ""
         photo_bitmap = row["image"]
         if photo_bitmap is not None:
-            stream = StringIO.StringIO(row["image"])
-            photo_bitmap = wx.BitmapFromImage(wx.ImageFromStream(stream))
+            photo_bitmap = QtGui.QPixmap.fromImage(QtGui.QImage.fromData(str(row["image"])))
 
         data = self.extract(battery_id=None, model_id=model_id, start_date=None, end_date=None, all_flights=False)
         cycles = data['totals']['cycles']
@@ -714,6 +730,12 @@ class Analyzer:
     def set_model_image(self, model_id, thumb_image, image):
         cur = self._db().cursor()
         cur.execute("UPDATE model set thumb = ?, image=? WHERE id=?", [sqlite3.Binary(thumb_image), sqlite3.Binary(image), str(model_id)])
+        self._conn.commit();
+        cur.close()
+
+    def clear_model_image(self, model_id):
+        cur = self._db().cursor()
+        cur.execute("UPDATE model set thumb = NULL, image=NULL WHERE id=?", [str(model_id)])
         self._conn.commit();
         cur.close()
  

@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="210mm"
+   height="297mm"
+   viewBox="0 0 744.09448819 1052.3622047"
+   id="svg2"
+   version="1.1"
+   inkscape:version="0.91 r13725"
+   sodipodi:docname="logo-red.svg">
+  <defs
+     id="defs4">
+    <linearGradient
+       inkscape:collect="always"
+       id="linearGradient4242">
+      <stop
+         style="stop-color:#e30000;stop-opacity:1;"
+         offset="0"
+         id="stop4244" />
+      <stop
+         style="stop-color:#e30000;stop-opacity:0;"
+         offset="1"
+         id="stop4246" />
+    </linearGradient>
+    <linearGradient
+       inkscape:collect="always"
+       id="linearGradient4174">
+      <stop
+         style="stop-color:#000000;stop-opacity:1;"
+         offset="0"
+         id="stop4176" />
+      <stop
+         style="stop-color:#000000;stop-opacity:0;"
+         offset="1"
+         id="stop4178" />
+    </linearGradient>
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient4174"
+       id="linearGradient4180"
+       x1="3.3376408"
+       y1="356.60837"
+       x2="652.57977"
+       y2="220.81039"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="translate(-624.57226,-120.87147)" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient4174"
+       id="linearGradient4256"
+       x1="154.55862"
+       y1="187.00606"
+       x2="202.03697"
+       y2="240.74635"
+       gradientUnits="userSpaceOnUse" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient4174"
+       id="linearGradient4268"
+       gradientUnits="userSpaceOnUse"
+       x1="154.55862"
+       y1="187.00606"
+       x2="202.03697"
+       y2="240.74635" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient4174"
+       id="linearGradient4270"
+       gradientUnits="userSpaceOnUse"
+       x1="154.55862"
+       y1="187.00606"
+       x2="202.03697"
+       y2="240.74635" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient4174"
+       id="linearGradient4272"
+       gradientUnits="userSpaceOnUse"
+       x1="154.55862"
+       y1="187.00606"
+       x2="202.03697"
+       y2="240.74635" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient4242"
+       id="linearGradient4248"
+       x1="-621.23462"
+       y1="235.73689"
+       x2="28.007513"
+       y2="99.938927"
+       gradientUnits="userSpaceOnUse" />
+  </defs>
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="0.49497475"
+     inkscape:cx="31.997346"
+     inkscape:cy="564.90409"
+     inkscape:document-units="px"
+     inkscape:current-layer="layer1"
+     showgrid="false"
+     inkscape:window-width="1680"
+     inkscape:window-height="956"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1" />
+  <metadata
+     id="metadata7">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <circle
+       style="opacity:1;fill:url(#linearGradient4248);fill-opacity:1;stroke:url(#linearGradient4180);stroke-width:20;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       id="path4144"
+       cx="-361.93262"
+       cy="196.09969"
+       transform="matrix(-0.19415667,-0.98097053,0.98097053,-0.19415667,0,0)"
+       r="244.45691"
+       inkscape:export-filename="/Users/linus/tmp/vcontrol-log-analyzer/assets/img/connection-off96.png"
+       inkscape:export-xdpi="16.974827"
+       inkscape:export-ydpi="16.974827" />
+    <flowRoot
+       xml:space="preserve"
+       id="flowRoot4242"
+       style="font-style:normal;font-variant:normal;font-weight:500;font-stretch:normal;font-size:39.99952316px;line-height:125%;font-family:Futura;-inkscape-font-specification:'Futura, Medium';text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#ffffff;fill-opacity:1;stroke:url(#linearGradient4256);stroke-width:1.89122128;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       transform="matrix(10.570032,0,0,10.153968,-1755.5736,-1944.2819)"><flowRegion
+         id="flowRegion4244"
+         style="stroke:url(#linearGradient4270)"><rect
+           id="rect4246"
+           width="254.55844"
+           height="292.94424"
+           x="177.78685"
+           y="199.79346"
+           style="font-style:normal;font-variant:normal;font-weight:500;font-stretch:normal;font-size:39.99952316px;line-height:125%;font-family:Futura;-inkscape-font-specification:'Futura, Medium';text-align:start;writing-mode:lr-tb;text-anchor:start;fill:#ffffff;fill-opacity:1;stroke:url(#linearGradient4268);stroke-width:1.89122128;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" /></flowRegion><flowPara
+         style="font-style:normal;font-variant:normal;font-weight:500;font-stretch:normal;font-size:39.99952316px;line-height:125%;font-family:Futura;-inkscape-font-specification:'Futura, Medium';text-align:start;writing-mode:lr-tb;text-anchor:start;stroke:url(#linearGradient4272);stroke-width:1.89122128;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none"
+         id="flowPara4264">V</flowPara></flowRoot>  </g>
+</svg>

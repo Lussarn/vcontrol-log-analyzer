@@ -1,4 +1,5 @@
 # -*- mode: python -*-
+import sys
 
 ##### include mydir in distribution #######
 def extra_datas(mydir):
@@ -19,7 +20,7 @@ def extra_datas(mydir):
     return extra_datas
 ###########################################
 
-a = Analysis(['src/vcontrol-gui.py'],
+a = Analysis(['src/VbcAnalyzer.py'],
              pathex=['./src'],
              hiddenimports=[],
              hookspath=None,
@@ -27,6 +28,14 @@ a = Analysis(['src/vcontrol-gui.py'],
 
 a.datas += extra_datas('assets')
 a.datas += extra_datas('locale')
+
+
+if "linux" in sys.platform:
+    name = "VbcAnalyzer.linux"
+elif "darwin" in sys.platform:
+    name = "VbcAnalyzer.osx"
+else:
+    name = "VbcAnalyzer.exe"
 
 for d in a.datas:
     if 'pyconfig' in d[0]: 
@@ -38,9 +47,17 @@ exe = EXE(pyz,
           a.binaries,
           a.zipfiles,
           a.datas,
-          name='VbcAnalyzer.exe',
+          name=name,
           debug=False,
           strip=None,
           upx=True,
-          icon='assets/program.ico',
-          console=True )
+          windowed=True,
+          onefile=True,
+          icon='assets/logo/logo.ico',
+          console=False )
+
+
+if "darwin" in sys.platform:
+   app = BUNDLE(exe,
+                name='VbcAnalyzer.app',
+                icon="assets/logo/logo.icns")

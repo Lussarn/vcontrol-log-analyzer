@@ -1,0 +1,6 @@
+tools/buildui.linux
+rm -rf build/*
+rm -rf dist/*
+pyinstaller --onefile --windowed VbcAnalyzer.spec
+cd dist
+zip -r VbcAnalyzer.zip VbcAnalyzer.app

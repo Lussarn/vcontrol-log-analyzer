@@ -1,0 +1,3 @@
+src/qtui/QTD*
+*.pyc
+.DS_Store

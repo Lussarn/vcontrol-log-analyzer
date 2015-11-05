@@ -3,47 +3,61 @@ Weekly graph window
 """
 __author__ = "linus.larsson@gmail.com"
 
+from numpy import arange, sin, pi, arange
+import matplotlib
+from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg  as Canvas
+import matplotlib.pyplot as plt
+
 from numpy import arange
 from matplotlib.figure import Figure
 from sets import Set
 from matplotlib.ticker import FixedLocator
+from PySide import QtGui, QtCore
 
-class WeekGraph(Figure):
-    def __init__(self, main_window, analyzer):
-        self._main_window = main_window
+
+
+
+class WeekGraph(Canvas):
+    def __init__(self, parent, analyzer, factor, font_factor):
+        self.factor = factor
+        self.font_factor = font_factor
         self._analyzer = analyzer
-        Figure.__init__(self)
-        self._axes = None
+        Canvas.__init__(self, Figure())
 
-    def update(self, start_date, end_date, model_id, battery_id, stack_as):
-        if (self._axes != None):
-            self._axes.clear()
+        self.figure = Figure()
+        self.canvas = Canvas(self.figure)        
+        self.figure._axes = None
 
-        self.set_facecolor("white")
-        self._axes = self.add_subplot(111)
+    def update_graph(self, start_date, end_date, model_id, battery_id, stack_as):
+        if (self.figure._axes != None):
+            self.figure._axes.clear()
 
-        self._axes.text(
+        self.figure.set_facecolor("white")
+        self.figure._axes = self.figure.add_subplot(111)
+
+        self.figure._axes.text(
             .5,
             1.05,
-            _("Cycles / week").decode("utf8"),
+            "Cycles / week",
             horizontalalignment="center",
-            transform=self._axes.transAxes,
-            fontsize=16)
+            transform=self.figure._axes.transAxes,
+            fontsize=16*self.font_factor)
 
-        self.subplots_adjust(
+        self.figure.subplots_adjust(
             left= 0.05, 
             right= 0.95 , 
             top=0.9, bottom=0.15)
-        self._axes.xaxis.set_tick_params(width=0)
-        self._axes.yaxis.grid(True)
-        self._axes.yaxis.set_label_text(_("Cycles").decode("utf8"), fontsize=12)
+        self.figure._axes.xaxis.set_tick_params(width=0)
+        self.figure._axes.yaxis.grid(True)
+        self.figure._axes.yaxis.set_label_text("Cycles", fontsize=12*self.font_factor)
 
-        self._axes.text(
+        self.figure._axes.text(
             .5,
             -0.15,
-            _("Week").decode("utf8"),
+            "Week",
             horizontalalignment="center",
-            transform=self._axes.transAxes)
+            transform=self.figure._axes.transAxes,
+            fontsize=12*self.font_factor)
 
         data = self._analyzer.extract_to_weeks(
             battery_id=battery_id, 
@@ -98,7 +112,7 @@ class WeekGraph(Figure):
                     name_colors[name] = color
                     legend = name
 
-                self._axes.bar(
+                self.figure._axes.bar(
                     left=bar_index, 
                     height=cycles, 
                     width=0.8, 
@@ -113,9 +127,9 @@ class WeekGraph(Figure):
             bar_index += 1
 
         # Legends
-        handles, labels = self._axes.get_legend_handles_labels()
+        handles, labels = self.figure._axes.get_legend_handles_labels()
         if len(data["data"]) > 1:
-            self._axes.legend(prop={"size": 11}, frameon=False)
+            self.figure._axes.legend(prop={"size": 11*self.font_factor}, frameon=False)
 
         keep = []
         for k in arange(0, len(ticks), float(len(ticks)) / 53):
@@ -127,8 +141,8 @@ class WeekGraph(Figure):
             if not i in keep:
                 ticks[i] = ""
 
-        self._axes.xaxis.set_major_locator(FixedLocator(arange(0.4,len(ticks), 1)))
-        self._axes.set_xticklabels(ticks, rotation=90, fontsize=8)
-        self._axes.set_xlim(-0.5, len(ticks) + 0.5)
-        
-        self.canvas.draw()
+        self.figure._axes.xaxis.set_major_locator(FixedLocator(arange(0.4,len(ticks), 1)))
+        self.figure._axes.set_xticklabels(ticks, rotation=90, fontsize=8*self.font_factor)
+        self.figure._axes.set_xlim(-0.5, len(ticks) + 0.5)
+
+        self.draw()

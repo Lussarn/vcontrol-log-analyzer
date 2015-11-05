@@ -13,15 +13,16 @@ def get(name, default = ''):
     conn = sqlite3.connect(os.path.join(os.path.expanduser("~"), ".vcontrol.db"))
     conn.row_factory = vc.util.sqlite_dict_factory
 
-
-    cur = conn.cursor()
-    cur.execute("SELECT value FROM variable WHERE name=?",[name])
-    rs = cur.fetchone()
-    if rs == None:
-        conn.close()
-        return default;
-
-    ret = rs["value"]
+    try:
+        cur = conn.cursor()
+        cur.execute("SELECT value FROM variable WHERE name=?",[name])
+        rs = cur.fetchone()
+        if rs == None:
+            conn.close()
+            return default;
+        ret = rs["value"]
+    except:
+        ret = default
     conn.close()
     return ret
 
