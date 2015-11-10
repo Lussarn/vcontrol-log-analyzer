@@ -195,8 +195,11 @@ class QDropHandler(QtCore.QObject):
                     for url in md.urls():
                         # OSX Workaround
                         if vc.globals.OS == "osx":
-                            from Foundation import NSURL
-                            filename = str(NSURL.URLWithString_(str(url.toString())).filePathURL().path())
+                            try:
+                                from Foundation import NSURL
+                                filename = str(NSURL.URLWithString_(str(url.toString())).filePathURL().path())
+                            except:
+                                filename = url.toLocalFile()
                         else:
                             filename = url.toLocalFile()
                         break
