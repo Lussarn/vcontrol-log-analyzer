@@ -70,3 +70,6 @@ Fixed swithed model/battery in weekly graph
 
 v4.0.0
 Switch to QT
+
+v4.0.1
+Import fix on 0000.00.00 dates in logfile
