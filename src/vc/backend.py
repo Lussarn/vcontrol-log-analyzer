@@ -227,7 +227,10 @@ class Analyzer:
                     continue
 
                 date = cols.pop(0)
-                date = time.strftime('%Y-%m-%d %H:%M:%S', time.strptime(date,'%d.%m.%Y %H:%M:%S'))
+                try:
+                    date = time.strftime('%Y-%m-%d %H:%M:%S', time.strptime(date,'%d.%m.%Y %H:%M:%S'))
+                except:
+                    continue
                 capacity = cols.pop(0)
                 used = cols.pop(0)
                 duration = cols.pop(0)
@@ -399,6 +402,7 @@ class Analyzer:
     Find and return the vcontrol path, if connected
     """
     def _find_vcontrol_path(self):
+        return "/home/linus/vc/steve-rosenlund"
         if vc.globals.OS == "linux":
             import pyudev, codecs
             path = None

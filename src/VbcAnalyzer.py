@@ -138,12 +138,12 @@ class WindowMain(QtGui.QMainWindow):
         # Init scan timer
         timer = QtCore.QTimer(self)
         timer.timeout.connect(self._on_connection_timer)
-        timer.start(1000)
 
         self.populate_gear()
         self.populate_grid()
         self.show()
         self.raise_()
+        timer.start(1000)
 
 
     def closeEvent(self, event):
