@@ -406,7 +406,7 @@ class Analyzer:
     Find and return the vcontrol path, if connected
     """
     def _find_vcontrol_path(self):
-        return "/home/linus/vc/joel"
+#        return "/home/linus/vc"
         if vc.globals.OS == "linux":
             import pyudev, codecs
             path = None
