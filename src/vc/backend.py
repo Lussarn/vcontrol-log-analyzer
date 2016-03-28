@@ -215,9 +215,13 @@ class Analyzer:
         for d in battery_dirs:
             name = open(os.path.join(d, 'name')).read(255).strip().strip("\x00")
             battery_id = self.get_battery_id_by_name(name)
-            with open(os.path.join(d, 'log.csv')) as f:
-                lines = f.readlines()
-            lines = [x.strip() for x in lines] 	
+            lines = {}
+            try:
+                with open(os.path.join(d, 'log.csv')) as f:
+                    lines = f.readlines()
+                lines = [x.strip() for x in lines]  
+            except:
+                pass
 
             for line_count, line in enumerate(lines):
                 self.status("Checking" + " " + name + " (" + str((line_count + 1) * 100 / len(lines)) + "%)")
@@ -402,7 +406,7 @@ class Analyzer:
     Find and return the vcontrol path, if connected
     """
     def _find_vcontrol_path(self):
-#        return "/home/linus/vc/"
+        return "/home/linus/vc/joel"
         if vc.globals.OS == "linux":
             import pyudev, codecs
             path = None
