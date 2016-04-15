@@ -39,9 +39,12 @@ class QTTelemetryWindow(QtGui.QMainWindow):
             "Headspeed", 
             "PWM", 
             "Capacity"
+            "Height"
+            "Speed"
         ]
 
-        self._colors = ["#1F77B4", "#2CA02C", "#8C564B", "#FF7F0E", "#D62728", "#9467BD"]
+        self._colors = ["#1F77B4", "#2CA02C", "#8C564B", "#FF7F0E", "#D62728", "#9467BD", "#e377c2", "#bcbd22"]
+# ["#e377c2","#7f7f7f","#bcbd22","#17becf"]
 
         self.setStyleSheet("QCheckBox { background-color: white }")
 
@@ -55,10 +58,13 @@ class QTTelemetryWindow(QtGui.QMainWindow):
 
         # data
         self._data = {} 
-        for i in xrange(-1, 6):
+        for i in xrange(-1, 8):
             self._data[i] = []  # sec
         self.duration = 0
-        for row in analyzer.extract_ui_by_log_id(log_id):
+        uilog = analyzer.extract_ui_by_log_id(log_id)
+        gpslog = analyzer.extract_gps_by_log_id(log_id)
+        ui_data = self.merge_ui_gps_log(uilog, gpslog)
+        for row in ui_data:
             self.duration = row["sec"]
             self._data[-1].append(row["sec"])
             self._data[0].append(row["voltage"])
@@ -67,6 +73,8 @@ class QTTelemetryWindow(QtGui.QMainWindow):
             self._data[3].append(row["headspeed"])
             self._data[4].append(row["pwm"])
             self._data[5].append(row["usedcapacity"])
+            self._data[6].append(row["height"])
+            self._data[7].append(row["speed"])
 
         # Screenshot
         pixmap = QtGui.QPixmap(self.pixmap_screenshot)
@@ -81,7 +89,7 @@ class QTTelemetryWindow(QtGui.QMainWindow):
         self._max_texts = {}
         self._avarage_texts = {}
 
-        for i in xrange(0, 6):
+        for i in xrange(0, 8):
             self._value_on_checkboxes[i] = self.ui.widget_grid.findChild(QtGui.QCheckBox, "grid_check_box_" + str(i))
             if vc.variable.get("ui-show-value-" + str(i), "1") == "1":
                 self._value_on_checkboxes[i].setCheckState(QtCore.Qt.Checked)
@@ -111,12 +119,12 @@ class QTTelemetryWindow(QtGui.QMainWindow):
         self._graphs = {}
         # Subgraphs
         self._graphs[-1] = axes
-        for i in xrange(0,6):
+        for i in xrange(0,8):
             self._graphs[i] = self._graphs[-1].twinx()
 
         # plots
         self._plots = {}
-        for i in xrange(0, 6):
+        for i in xrange(0, 8):
             self._plots[i], = self._graphs[i].plot(self._data[-1], self._data[i], self._colors[i], linewidth=0.5 * self.factor)
 
         # scale graphs
@@ -125,6 +133,8 @@ class QTTelemetryWindow(QtGui.QMainWindow):
         self._graphs[2].set_ylim(0, max(self._data[2]) * 1.5)
         self._graphs[3].set_ylim(0, max( { max(self._data[3]), 100 } ) * 1.5)
         self._graphs[5].set_ylim(0)
+        self._graphs[6].set_ylim(min(self._data[6]), max(self._data[6]) + 1)
+        self._graphs[7].set_ylim(0, max(self._data[7]) + 1)
 
         # colors and locators
         fs = 8*self.font_factor
@@ -133,12 +143,12 @@ class QTTelemetryWindow(QtGui.QMainWindow):
         self._graphs[-1].tick_params(axis="x", colors="#555555", which="major", direction="in", labelsize=fs, size=4*self.factor, width=1*self.factor)
         self._graphs[-1].tick_params(axis="x", colors="#555555", which="minor", direction="in", labelsize=fs, size=2*self.factor, width=1*self.factor)
 
-        for i in xrange(0, 6):
+        for i in xrange(0, 8):
             self._graphs[i].yaxis.label.set_color(self._plots[i].get_color())
             self._graphs[i].yaxis.set_minor_locator(AutoMinorLocator())
 
         # ticks
-        for i in xrange(0, 6):
+        for i in xrange(0, 8):
             self._graphs[i].tick_params(axis="y", colors=self._plots[i].get_color(), which="major", direction="out", labelsize=fs, size=4*self.factor, width=1*self.factor)
             self._graphs[i].tick_params(axis="y", colors=self._plots[i].get_color(), which="minor", direction="out", labelsize=fs, size=2*self.factor, width=1*self.factor)
 
@@ -147,7 +157,7 @@ class QTTelemetryWindow(QtGui.QMainWindow):
         self._update_min_max(0, self.duration)
         self._graphs[0].set_xlim(0, self.duration)
 
-        for i in xrange(0, 6):
+        for i in xrange(0, 8):
             self._graphs[i].set_visible(self._value_on_checkboxes[i].isChecked());
 
         # Matplot events
@@ -164,6 +174,8 @@ class QTTelemetryWindow(QtGui.QMainWindow):
             3: { "pos": "right" }, # Headspeed
             4: { "pos": "right" }, # PWM
             5: { "pos": "right" }, # Capacity
+            6: { "pos": "left" }, # Height
+            7: { "pos": "right" }, # Speed
         }
 
         # spines
@@ -179,7 +191,7 @@ class QTTelemetryWindow(QtGui.QMainWindow):
         left  = space
         right = 1.0 - space
 
-        for i in xrange(0,6):
+        for i in xrange(0,8):
             if self._value_on_checkboxes[i].isChecked():
                 pos = spines_data[i]["pos"]
                 if pos == "left":
@@ -212,6 +224,8 @@ class QTTelemetryWindow(QtGui.QMainWindow):
         self._graphs[3].set_ylabel("Headspeed (RPM)", fontsize=fs)
         self._graphs[4].set_ylabel("PWM (%)", fontsize=fs)
         self._graphs[5].set_ylabel("Used capacity (mAh)", fontsize=fs)
+        self._graphs[6].set_ylabel("Height (M)", fontsize=fs)
+        self._graphs[7].set_ylabel("Speed (Kmh)", fontsize=fs)
 
 
     def _make_patch_spines_invisible(self, ax):
@@ -222,7 +236,7 @@ class QTTelemetryWindow(QtGui.QMainWindow):
             sp.set_visible(False)
 
     def _on_label_checkbox(self, event):
-        for i in xrange(0,6):
+        for i in xrange(0,8):
             self._graphs[i].set_visible(self._value_on_checkboxes[i].isChecked());
             if self._value_on_checkboxes[i].isChecked():
                 vc.variable.set("ui-show-value-" + str(i), "1");
@@ -258,7 +272,7 @@ class QTTelemetryWindow(QtGui.QMainWindow):
         polygon = None
         if self._select_start == None:
             linev = self._graphs[0].axvline(x=event.xdata, linewidth=1, color="#000000", alpha=0.5)
-            lineh = self._graphs[5].axhline(y=event.ydata, linewidth=1, color="#000000", alpha=0.5)
+            lineh = self._graphs[7].axhline(y=event.ydata, linewidth=1, color="#000000", alpha=0.5)
             self._graphs[0].draw_artist(linev)
             self._graphs[0].draw_artist(lineh)
         else:
@@ -270,7 +284,7 @@ class QTTelemetryWindow(QtGui.QMainWindow):
                 col = "#aa4444"
             else:
                 col = "#888888"
-            polygon = Rectangle((start, 0), width, y1, facecolor=col, alpha=0.5)
+            polygon = Rectangle((start, 0), width, y1 + 10000, facecolor=col, alpha=0.5)
             self._graphs[0].add_patch(polygon)
             self._graphs[0].draw_artist(polygon)
 
@@ -281,7 +295,7 @@ class QTTelemetryWindow(QtGui.QMainWindow):
         if polygon != None:
             polygon.remove()
 
-        for i in xrange(0, 6):
+        for i in xrange(0, 8):
             if (i < 2):
                 val = str(self._data[i][index])
             else:
@@ -339,7 +353,7 @@ class QTTelemetryWindow(QtGui.QMainWindow):
         if index2 >= len(self._data[0]):
             index2 = len(self._data[0]) - 1
 
-        for i in xrange(0, 6):
+        for i in xrange(0, 8):
             m = max(self._data[i][index1:index2])
             if (i < 2):
                 m =  "{0:.1f}".format(round(m,1))
@@ -354,7 +368,9 @@ class QTTelemetryWindow(QtGui.QMainWindow):
                 m = int(m)
             self._min_texts[i].setText(str(m))
 
-        for i in xrange(0, 5):
+        for i in xrange(0, 8):
+            if i == 5:
+                continue
             m = reduce(lambda x, y: x + y, self._data[i][index1:index2]) / len(self._data[i][index1:index2])
             if (i < 2):
                 m =  "{0:.1f}".format(round(m,1))
@@ -372,3 +388,29 @@ class QTTelemetryWindow(QtGui.QMainWindow):
         self.ui.push_buttton_screenshot.hide()
         vc.screenshot.grab(self)
         self.ui.push_buttton_screenshot.show()
+
+    def merge_ui_gps_log(self, uilog, gpslog):
+        data = uilog["data"]
+        for j in xrange(len(uilog["data"])):
+            row = uilog["data"][j]
+
+            if gpslog is not None:
+                timestamp_ui_row = row["sec"] + uilog["start"]
+                nearest_timestamp = None
+                nearest_index = -1
+                for i in xrange(len(gpslog["data"])):
+                    row_gps = gpslog["data"][i]
+                    timestamp_gps_row = row_gps["sec"] + gpslog["start"]
+                    if nearest_index == -1 or abs(timestamp_ui_row - timestamp_gps_row) < nearest_timestamp:
+                        nearest_timestamp = abs(timestamp_ui_row - timestamp_gps_row)
+                        nearest_index = i
+                data[j]["height"] = gpslog["data"][nearest_index]["height"]
+                data[j]["speed"] = gpslog["data"][nearest_index]["speed"]
+            else:
+                data[j]["height"] = 0
+                data[j]["speed"] = 0
+        return data
+
+
+
+

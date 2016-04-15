@@ -315,60 +315,8 @@
                 <property name="spacing">
                  <number>6</number>
                 </property>
-                <item row="0" column="5">
-                 <layout class="QHBoxLayout" name="horizontalLayout_6">
-                  <property name="spacing">
-                   <number>6</number>
-                  </property>
-                  <property name="leftMargin">
-                   <number>0</number>
-                  </property>
-                  <item>
-                   <spacer name="horizontalSpacer_2">
-                    <property name="orientation">
-                     <enum>Qt::Horizontal</enum>
-                    </property>
-                    <property name="sizeHint" stdset="0">
-                     <size>
-                      <width>2</width>
-                      <height>10</height>
-                     </size>
-                    </property>
-                   </spacer>
-                  </item>
-                  <item>
-                   <widget class="QCheckBox" name="grid_check_box_4">
-                    <property name="minimumSize">
-                     <size>
-                      <width>0</width>
-                      <height>18</height>
-                     </size>
-                    </property>
-                    <property name="styleSheet">
-                     <string notr="true">QCheckBox {color: #D62728}</string>
-                    </property>
-                    <property name="text">
-                     <string>PWM</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item>
-                   <spacer name="horizontalSpacer">
-                    <property name="orientation">
-                     <enum>Qt::Horizontal</enum>
-                    </property>
-                    <property name="sizeHint" stdset="0">
-                     <size>
-                      <width>2</width>
-                      <height>10</height>
-                     </size>
-                    </property>
-                   </spacer>
-                  </item>
-                 </layout>
-                </item>
-                <item row="3" column="2" alignment="Qt::AlignHCenter">
-                 <widget class="QLabel" name="grid_label_2_1">
+                <item row="4" column="3" alignment="Qt::AlignHCenter">
+                 <widget class="QLabel" name="grid_label_3_2">
                   <property name="minimumSize">
                    <size>
                     <width>0</width>
@@ -383,8 +331,90 @@
                   </property>
                  </widget>
                 </item>
-                <item row="3" column="4" alignment="Qt::AlignHCenter">
-                 <widget class="QLabel" name="grid_label_2_3">
+                <item row="2" column="1" alignment="Qt::AlignHCenter">
+                 <widget class="QLabel" name="grid_label_1_0">
+                  <property name="minimumSize">
+                   <size>
+                    <width>0</width>
+                    <height>13</height>
+                   </size>
+                  </property>
+                  <property name="maximumSize">
+                   <size>
+                    <width>16777215</width>
+                    <height>13</height>
+                   </size>
+                  </property>
+                  <property name="text">
+                   <string>0</string>
+                  </property>
+                  <property name="alignment">
+                   <set>Qt::AlignCenter</set>
+                  </property>
+                 </widget>
+                </item>
+                <item row="3" column="0" alignment="Qt::AlignRight">
+                 <widget class="QLabel" name="label_5">
+                  <property name="minimumSize">
+                   <size>
+                    <width>0</width>
+                    <height>13</height>
+                   </size>
+                  </property>
+                  <property name="maximumSize">
+                   <size>
+                    <width>16777215</width>
+                    <height>13</height>
+                   </size>
+                  </property>
+                  <property name="text">
+                   <string>Max</string>
+                  </property>
+                  <property name="alignment">
+                   <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                  </property>
+                 </widget>
+                </item>
+                <item row="1" column="0" alignment="Qt::AlignRight">
+                 <widget class="QLabel" name="label_0_0">
+                  <property name="minimumSize">
+                   <size>
+                    <width>0</width>
+                    <height>13</height>
+                   </size>
+                  </property>
+                  <property name="maximumSize">
+                   <size>
+                    <width>16777215</width>
+                    <height>13</height>
+                   </size>
+                  </property>
+                  <property name="text">
+                   <string>Mouse</string>
+                  </property>
+                  <property name="alignment">
+                   <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                  </property>
+                 </widget>
+                </item>
+                <item row="1" column="3" alignment="Qt::AlignHCenter">
+                 <widget class="QLabel" name="grid_label_0_2">
+                  <property name="minimumSize">
+                   <size>
+                    <width>0</width>
+                    <height>13</height>
+                   </size>
+                  </property>
+                  <property name="text">
+                   <string>0</string>
+                  </property>
+                  <property name="alignment">
+                   <set>Qt::AlignCenter</set>
+                  </property>
+                 </widget>
+                </item>
+                <item row="1" column="6" alignment="Qt::AlignHCenter">
+                 <widget class="QLabel" name="grid_label_0_5">
                   <property name="minimumSize">
                    <size>
                     <width>0</width>
@@ -407,6 +437,26 @@
                     <height>13</height>
                    </size>
                   </property>
+                  <property name="text">
+                   <string>0</string>
+                  </property>
+                  <property name="alignment">
+                   <set>Qt::AlignCenter</set>
+                  </property>
+                 </widget>
+                </item>
+                <item row="4" column="7">
+                 <widget class="QLabel" name="grid_label_3_6">
+                  <property name="text">
+                   <string>0</string>
+                  </property>
+                  <property name="alignment">
+                   <set>Qt::AlignCenter</set>
+                  </property>
+                 </widget>
+                </item>
+                <item row="1" column="8">
+                 <widget class="QLabel" name="grid_label_0_7">
                   <property name="text">
                    <string>0</string>
                   </property>
@@ -491,8 +541,18 @@
                   </property>
                  </widget>
                 </item>
-                <item row="4" column="3" alignment="Qt::AlignHCenter">
-                 <widget class="QLabel" name="grid_label_3_2">
+                <item row="4" column="8">
+                 <widget class="QLabel" name="grid_label_3_7">
+                  <property name="text">
+                   <string>0</string>
+                  </property>
+                  <property name="alignment">
+                   <set>Qt::AlignCenter</set>
+                  </property>
+                 </widget>
+                </item>
+                <item row="1" column="7">
+                 <widget class="QLabel" name="grid_label_0_6">
                   <property name="minimumSize">
                    <size>
                     <width>0</width>
@@ -507,17 +567,119 @@
                   </property>
                  </widget>
                 </item>
-                <item row="2" column="1" alignment="Qt::AlignHCenter">
-                 <widget class="QLabel" name="grid_label_1_0">
+                <item row="3" column="7">
+                 <widget class="QLabel" name="grid_label_2_6">
+                  <property name="text">
+                   <string>0</string>
+                  </property>
+                  <property name="alignment">
+                   <set>Qt::AlignCenter</set>
+                  </property>
+                 </widget>
+                </item>
+                <item row="0" column="7">
+                 <layout class="QHBoxLayout" name="horizontalLayout_12">
+                  <item>
+                   <spacer name="horizontalSpacer_14">
+                    <property name="orientation">
+                     <enum>Qt::Horizontal</enum>
+                    </property>
+                    <property name="sizeHint" stdset="0">
+                     <size>
+                      <width>2</width>
+                      <height>10</height>
+                     </size>
+                    </property>
+                   </spacer>
+                  </item>
+                  <item>
+                   <widget class="QCheckBox" name="grid_check_box_6">
+                    <property name="minimumSize">
+                     <size>
+                      <width>0</width>
+                      <height>18</height>
+                     </size>
+                    </property>
+                    <property name="styleSheet">
+                     <string notr="true">QCheckBox {color: #e377c2;}</string>
+                    </property>
+                    <property name="text">
+                     <string>Height</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <spacer name="horizontalSpacer_15">
+                    <property name="orientation">
+                     <enum>Qt::Horizontal</enum>
+                    </property>
+                    <property name="sizeHint" stdset="0">
+                     <size>
+                      <width>2</width>
+                      <height>10</height>
+                     </size>
+                    </property>
+                   </spacer>
+                  </item>
+                 </layout>
+                </item>
+                <item row="0" column="5">
+                 <layout class="QHBoxLayout" name="horizontalLayout_6">
+                  <property name="spacing">
+                   <number>6</number>
+                  </property>
+                  <property name="leftMargin">
+                   <number>0</number>
+                  </property>
+                  <item>
+                   <spacer name="horizontalSpacer_2">
+                    <property name="orientation">
+                     <enum>Qt::Horizontal</enum>
+                    </property>
+                    <property name="sizeHint" stdset="0">
+                     <size>
+                      <width>2</width>
+                      <height>10</height>
+                     </size>
+                    </property>
+                   </spacer>
+                  </item>
+                  <item>
+                   <widget class="QCheckBox" name="grid_check_box_4">
+                    <property name="minimumSize">
+                     <size>
+                      <width>0</width>
+                      <height>18</height>
+                     </size>
+                    </property>
+                    <property name="styleSheet">
+                     <string notr="true">QCheckBox {color: #D62728}</string>
+                    </property>
+                    <property name="text">
+                     <string>PWM</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <spacer name="horizontalSpacer">
+                    <property name="orientation">
+                     <enum>Qt::Horizontal</enum>
+                    </property>
+                    <property name="sizeHint" stdset="0">
+                     <size>
+                      <width>2</width>
+                      <height>10</height>
+                     </size>
+                    </property>
+                   </spacer>
+                  </item>
+                 </layout>
+                </item>
+                <item row="3" column="2" alignment="Qt::AlignHCenter">
+                 <widget class="QLabel" name="grid_label_2_1">
                   <property name="minimumSize">
                    <size>
                     <width>0</width>
-                    <height>13</height>
-                   </size>
-                  </property>
-                  <property name="maximumSize">
-                   <size>
-                    <width>16777215</width>
                     <height>13</height>
                    </size>
                   </property>
@@ -529,52 +691,8 @@
                   </property>
                  </widget>
                 </item>
-                <item row="3" column="0" alignment="Qt::AlignRight">
-                 <widget class="QLabel" name="label_5">
-                  <property name="minimumSize">
-                   <size>
-                    <width>0</width>
-                    <height>13</height>
-                   </size>
-                  </property>
-                  <property name="maximumSize">
-                   <size>
-                    <width>16777215</width>
-                    <height>13</height>
-                   </size>
-                  </property>
-                  <property name="text">
-                   <string>Max</string>
-                  </property>
-                  <property name="alignment">
-                   <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                  </property>
-                 </widget>
-                </item>
-                <item row="1" column="0" alignment="Qt::AlignRight">
-                 <widget class="QLabel" name="label_0_0">
-                  <property name="minimumSize">
-                   <size>
-                    <width>0</width>
-                    <height>13</height>
-                   </size>
-                  </property>
-                  <property name="maximumSize">
-                   <size>
-                    <width>16777215</width>
-                    <height>13</height>
-                   </size>
-                  </property>
-                  <property name="text">
-                   <string>Mouse</string>
-                  </property>
-                  <property name="alignment">
-                   <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                  </property>
-                 </widget>
-                </item>
-                <item row="1" column="6" alignment="Qt::AlignHCenter">
-                 <widget class="QLabel" name="grid_label_0_5">
+                <item row="3" column="4" alignment="Qt::AlignHCenter">
+                 <widget class="QLabel" name="grid_label_2_3">
                   <property name="minimumSize">
                    <size>
                     <width>0</width>
@@ -591,22 +709,6 @@
                 </item>
                 <item row="1" column="2" alignment="Qt::AlignHCenter">
                  <widget class="QLabel" name="grid_label_0_1">
-                  <property name="minimumSize">
-                   <size>
-                    <width>0</width>
-                    <height>13</height>
-                   </size>
-                  </property>
-                  <property name="text">
-                   <string>0</string>
-                  </property>
-                  <property name="alignment">
-                   <set>Qt::AlignCenter</set>
-                  </property>
-                 </widget>
-                </item>
-                <item row="1" column="3" alignment="Qt::AlignHCenter">
-                 <widget class="QLabel" name="grid_label_0_2">
                   <property name="minimumSize">
                    <size>
                     <width>0</width>
@@ -723,6 +825,22 @@
                   </property>
                  </widget>
                 </item>
+                <item row="4" column="6" alignment="Qt::AlignHCenter">
+                 <widget class="QLabel" name="grid_label_3_5">
+                  <property name="minimumSize">
+                   <size>
+                    <width>0</width>
+                    <height>13</height>
+                   </size>
+                  </property>
+                  <property name="text">
+                   <string>0</string>
+                  </property>
+                  <property name="alignment">
+                   <set>Qt::AlignCenter</set>
+                  </property>
+                 </widget>
+                </item>
                 <item row="2" column="6" alignment="Qt::AlignHCenter">
                  <widget class="QLabel" name="grid_label_1_5">
                   <property name="minimumSize">
@@ -741,22 +859,6 @@
                 </item>
                 <item row="3" column="6" alignment="Qt::AlignHCenter">
                  <widget class="QLabel" name="grid_label_2_5">
-                  <property name="minimumSize">
-                   <size>
-                    <width>0</width>
-                    <height>13</height>
-                   </size>
-                  </property>
-                  <property name="text">
-                   <string>0</string>
-                  </property>
-                  <property name="alignment">
-                   <set>Qt::AlignCenter</set>
-                  </property>
-                 </widget>
-                </item>
-                <item row="4" column="6" alignment="Qt::AlignHCenter">
-                 <widget class="QLabel" name="grid_label_3_5">
                   <property name="minimumSize">
                    <size>
                     <width>0</width>
@@ -1135,6 +1237,82 @@
                    </size>
                   </property>
                  </spacer>
+                </item>
+                <item row="3" column="8">
+                 <widget class="QLabel" name="grid_label_2_7">
+                  <property name="text">
+                   <string>0</string>
+                  </property>
+                  <property name="alignment">
+                   <set>Qt::AlignCenter</set>
+                  </property>
+                 </widget>
+                </item>
+                <item row="2" column="8">
+                 <widget class="QLabel" name="grid_label_1_7">
+                  <property name="text">
+                   <string>0</string>
+                  </property>
+                  <property name="alignment">
+                   <set>Qt::AlignCenter</set>
+                  </property>
+                 </widget>
+                </item>
+                <item row="2" column="7">
+                 <widget class="QLabel" name="grid_label_1_6">
+                  <property name="text">
+                   <string>0</string>
+                  </property>
+                  <property name="alignment">
+                   <set>Qt::AlignCenter</set>
+                  </property>
+                 </widget>
+                </item>
+                <item row="0" column="8">
+                 <layout class="QHBoxLayout" name="horizontalLayout_13">
+                  <item>
+                   <spacer name="horizontalSpacer_16">
+                    <property name="orientation">
+                     <enum>Qt::Horizontal</enum>
+                    </property>
+                    <property name="sizeHint" stdset="0">
+                     <size>
+                      <width>2</width>
+                      <height>10</height>
+                     </size>
+                    </property>
+                   </spacer>
+                  </item>
+                  <item>
+                   <widget class="QCheckBox" name="grid_check_box_7">
+                    <property name="minimumSize">
+                     <size>
+                      <width>0</width>
+                      <height>18</height>
+                     </size>
+                    </property>
+                    <property name="styleSheet">
+                     <string notr="true">QCheckBox {color: #bcbd22;}</string>
+                    </property>
+                    <property name="text">
+                     <string>Speed</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <spacer name="horizontalSpacer_17">
+                    <property name="orientation">
+                     <enum>Qt::Horizontal</enum>
+                    </property>
+                    <property name="sizeHint" stdset="0">
+                     <size>
+                      <width>2</width>
+                      <height>10</height>
+                     </size>
+                    </property>
+                   </spacer>
+                  </item>
+                 </layout>
                 </item>
                </layout>
               </item>

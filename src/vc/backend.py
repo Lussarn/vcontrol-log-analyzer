@@ -122,6 +122,18 @@ class Analyzer:
             cur.execute("CREATE INDEX idx_ui_logid ON uilog (logid)");
             self._conn.commit();
 
+        cur = self._conn.cursor()
+        cur.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='gpslog'")
+        rs = cur.fetchone()
+        if rs == None:
+            print "Creating database table gpslog";
+            cur = self._conn.cursor()
+            cur.execute("CREATE TABLE gpslog (id INTEGER PRIMARY KEY autoincrement, logid INTEGER, original_filename VARCHAR(255), model VARCHAR(255), date DATETIME, latitude NUMERIC(2,6), longitude NUMERIC(2,6), height INTEGER, speed INTEGER)");
+            self._conn.commit();
+            cur = self._conn.cursor()
+            cur.execute("CREATE INDEX idx_gps_logid ON gpslog (logid)");
+            self._conn.commit();
+
         return self._conn
 
     def get_battery_id_by_name(self, name):
@@ -276,12 +288,15 @@ class Analyzer:
                         if vbar_log_filename.find("_vplane.log") != -1:
                             model_type = "AIRPLANE"
 
-                        # UI file has same number as VBar log file,
+                        # UI and GPS file has same number as VBar log file,
                         ui_log_filename = vbar_log_filename.replace('_vbar.log', '_ui.csv').replace('_vcp.log', '_ui.csv').replace('_vplane.log', '_ui.csv')
+                        gps_log_filename = vbar_log_filename.replace('_vbar.log', '_gps.csv').replace('_vcp.log', '_gps.csv').replace('_vplane.log', '_gps.csv')
 
                         cur = self._db().cursor()
                         cur.execute('UPDATE uilog SET logid = ? WHERE original_filename = ?',
                             [log_id, ui_log_filename])
+                        cur.execute('UPDATE gpslog SET logid = ? WHERE original_filename = ?',
+                            [log_id, gps_log_filename])
                         cur.execute('UPDATE model SET type = ? WHERE name = ?',
                             [model_type, model_name])
                         self._db().commit()
@@ -353,33 +368,55 @@ class Analyzer:
 
                 # See if we have an ui file for this flight
                 ui_filename = vbar_filename.replace('_vbar.log', '_ui.csv').replace('_vcp.log', '_ui.csv').replace('_vplane.log', '_ui.csv')
+                if os.path.isfile(os.path.join(model_path, ui_filename)):
+                    with open(os.path.join(model_path, ui_filename)) as f:
+                        lines = f.readlines()
+                    lines = [x.strip() for x in lines]
 
-                if not os.path.isfile(os.path.join(model_path, ui_filename)):
-                    continue
+                    # remove first line
+                    lines.pop(0)
+                    date = start_date
 
-                with open(os.path.join(model_path, ui_filename)) as f:
-                    lines = f.readlines()
-                lines = [x.strip() for x in lines]
-	
-                # remove first line
-                lines.pop(0)
+                    for line in lines:
+                        cols = line.split(';')
+                        if len(cols) != 6:
+                            continue
+        	
+                        hour = cols[0][:2]
+                        # Rollover on date
+                        if (last_hour == '23' and hour == '00'):
+                            date = date + datetime.timedelta(days = 1)
+                        sql_date = date.strftime('%Y-%m-%d') + ' ' + cols[0]
 
-                date = start_date
+                        cur.execute('INSERT INTO uilog (original_filename, model, date, ampere, voltage, usedcapacity, headspeed, pwm) VALUES (?,?,?,?,?,?,?,?)',
+                            [ui_filename, model_name, sql_date, float(cols[1]), float(cols[2]), float(cols[3]), int(cols[4]), int(cols[5])])
+                    self._db().commit()
 
-                for line in lines:
-                    cols = line.split(';')
-                    if len(cols) != 6:
-                        continue
-		
-                    hour = cols[0][:2]
-                    # Rollover on date
-                    if (last_hour == '23' and hour == '00'):
-                        date = date + datetime.timedelta(days = 1)
-                    sql_date = date.strftime('%Y-%m-%d') + ' ' + cols[0]
+                # See if we have an gps file for this flight
+                gps_filename = vbar_filename.replace('_vbar.log', '_gps.csv').replace('_vcp.log', '_gps.csv').replace('_vplane.log', '_gps.csv')
+                if os.path.isfile(os.path.join(model_path, gps_filename)):
+                    with open(os.path.join(model_path, gps_filename)) as f:
+                        lines = f.readlines()
+                    lines = [x.strip() for x in lines]
 
-                    cur.execute('INSERT INTO uilog (original_filename, model, date, ampere, voltage, usedcapacity, headspeed, pwm) VALUES (?,?,?,?,?,?,?,?)',
-                        [ui_filename, model_name, sql_date, float(cols[1]), float(cols[2]), float(cols[3]), int(cols[4]), int(cols[5])])
-                self._db().commit()
+                    # remove first line
+                    lines.pop(0)
+                    date = start_date
+
+                    for line in lines:
+                        cols = line.split(',')
+                        if len(cols) != 5:
+                            continue
+            
+                        hour = cols[0][:2]
+                        # Rollover on date
+                        if (last_hour == '23' and hour == '00'):
+                            date = date + datetime.timedelta(days = 1)
+                        sql_date = date.strftime('%Y-%m-%d') + ' ' + cols[0]
+                        cur.execute('INSERT INTO gpslog (original_filename, model, date, longitude, latitude, height, speed) VALUES (?,?,?,?,?,?,?)',
+                            [gps_filename, model_name, sql_date, float(cols[1]), float(cols[2]), int(cols[3]), int(cols[4])])
+                    self._db().commit()
+
         return
 
     """
@@ -472,6 +509,7 @@ class Analyzer:
             SELECT l.id, b.name as batteryname, m.name as modelname, l.date, l.duration, l.capacity, l.used, l.minvoltage, l.maxampere, l.uid, \
             (select count(*) > 1 from vbarlog vbl WHERE l.id=vbl.logid) as havevbarlog, \
             (select count(*) > 1 from uilog ul WHERE l.id=ul.logid) as haveuilog, \
+            (select count(*) > 1 from gpslog ul WHERE l.id=ul.logid) as havegpslog, \
             (select count(*) > 1 from vbarlog vbl WHERE l.id=vbl.logid and (severity=4 and (message not like '%Extreme Vibration%' AND message not like '%Gefaehrliche Vibrationen%'))) as havevbarlogproblem \
             FROM batterylog l \
             LEFT JOIN battery b on b.id=l.batteryid \
@@ -530,6 +568,7 @@ class Analyzer:
                 'session': session_count, 
                 'havevbarlog': row["havevbarlog"], 
                 'haveuilog': row["haveuilog"], 
+                'havegpslog': row["havegpslog"], 
                 'havevbarlogproblem': row["havevbarlogproblem"] 
             })
             old_date = date
@@ -628,7 +667,39 @@ class Analyzer:
         }
         return info
 
+    def extract_gps_by_log_id(self, log_id):
+        sql = "\
+            SELECT  model, date, longitude, latitude, height, speed FROM gpslog where logid=" + str(log_id)
+        cur = self._db().cursor()
+        out = []
+        firstDate = False
+        for row in cur.execute(sql):
+            if firstDate == False:
+                firstDate = row["date"]
+            lastDate = row["date"]
+
+            out.append({
+                'model': row["model"],
+                'longitude': float(row["longitude"]),
+                'latitude': float(row["latitude"]),
+                'height': float(row["height"]),
+                'speed': int(row["speed"]),
+            })
+
+        if firstDate == False:
+            return None
+
+        start =time.mktime(time.strptime(firstDate, '%Y-%m-%d %H:%M:%S'))
+        end =time.mktime(time.strptime(lastDate, '%Y-%m-%d %H:%M:%S'))
+        dur = end - start
+
+        for i,row in enumerate(out):
+            out[i]['sec'] = (float(i) / len(out)) * dur
+
+        return { "start": start, "data" : out }
+
     def extract_ui_by_log_id(self, log_id):
+
         sql = "\
             SELECT  model, date, ampere, voltage, usedcapacity, headspeed, pwm FROM uilog where logid=" + str(log_id)
 
@@ -681,7 +752,7 @@ class Analyzer:
         for i,row in enumerate(out):
             out[i]['sec'] = (float(i) / len(out)) * dur
 
-        return out
+        return { "start": start, "data" : out }
 
     def extract_vbar_log(self, log_id):
         sql = "\

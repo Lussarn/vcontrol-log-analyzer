@@ -18,6 +18,7 @@ from QTTelemetryWindow import QTTelemetryWindow
 from QTModelWindow import QTModelWindow
 from QTLogWindow import QTLogWindow
 from QTAboutDialog import QTAboutDialog
+from KMLExport import KMLExport
 
 from ImportThread import ImportThread
 
@@ -94,7 +95,7 @@ class WindowMain(QtGui.QMainWindow):
         self.telemetry_windows = {}
         self.log_windows = {}
 
-
+        self.kml_export = KMLExport(self._analyzer)
 
         # Seasons
         seasons = self._analyzer.get_seasons()
@@ -104,10 +105,10 @@ class WindowMain(QtGui.QMainWindow):
         self.ui.combo_box_season.setCurrentIndex(self.ui.combo_box_season.count()-1)
 
         # Table headers
-        table_headers = ["Id", "Date", "Battery Name", "Model Name", "Flight Time", "Capacity", "Used Capacity", "MinV", "MaxA", "IdleV", "VBLog", "UiLog"]
+        table_headers = ["Id", "Date", "Battery Name", "Model Name", "Flight Time", "Capacity", "Used Capacity", "MinV", "MaxA", "IdleV", "VBLog", "UILog", "KML"]
         self.ui.table_widget_data.setHorizontalHeaderLabels(table_headers)
 
-        for index, width in enumerate([50 * self.factor, 120 * self.factor, 120 * self.factor, 120 * self.factor, 65 * self.factor, 65 * self.factor, 80 * self.factor, 50 * self.factor, 50 * self.factor, 50 * self.factor, 50 * self.factor]):
+        for index, width in enumerate([50 * self.factor, 120 * self.factor, 120 * self.factor, 120 * self.factor, 65 * self.factor, 65 * self.factor, 80 * self.factor, 50 * self.factor, 50 * self.factor, 50 * self.factor, 50 * self.factor, 50 * self.factor]):
             self.ui.table_widget_data.setColumnWidth(index, width)
 
         self.ui.table_widget_data.horizontalHeader().setDefaultAlignment(QtCore.Qt.AlignLeft)
@@ -256,7 +257,7 @@ class WindowMain(QtGui.QMainWindow):
                 item.setBackground(QtGui.QBrush(QtGui.QColor("#1F77B4")))
                 item.setForeground(QtGui.QBrush(QtGui.QColor("#FFFFFF")))
                 self.ui.table_widget_data.setItem(row_index, 1, item)
-                self.ui.table_widget_data.setSpan(row_index, 1, 1, 11)
+                self.ui.table_widget_data.setSpan(row_index, 1, 1, 12)
 
                 row_color_index = 0
                 row_index += 1
@@ -276,7 +277,8 @@ class WindowMain(QtGui.QMainWindow):
                 str(d["maxa"]),
                 str(d["idlev"]),
                 ("Show" if str(d["havevbarlog"]) == "1" else ""),
-                ("Show" if str(d["haveuilog"]) == "1" else "")
+                ("Show" if str(d["haveuilog"]) == "1" else ""),
+                ("Save" if str(d["havegpslog"]) == "1" else ""),
             ]
 
             if row_color_index % 2 == 0:
@@ -292,7 +294,7 @@ class WindowMain(QtGui.QMainWindow):
                         item.setBackground(QtGui.QBrush(QtGui.QColor("#FFAAAA")))
                     else:
                         item.setBackground(QtGui.QBrush(QtGui.QColor("#C86666")))
-                if index == 10 or index == 11:
+                if index == 10 or index == 11 or index == 12:
                     item.setForeground(QtGui.QBrush(QtGui.QColor("#0000FF")))
                
                 self.ui.table_widget_data.setItem(row_index, index, item)
@@ -307,14 +309,14 @@ class WindowMain(QtGui.QMainWindow):
         # Resize columns to content        
         self.ui.table_widget_data.horizontalHeader().setStretchLastSection(False)
         widths = {}
-        for index in xrange(0, 12):
+        for index in xrange(0, 13):
             widths[index] = self.ui.table_widget_data.columnWidth(index)
             if index == 11:
                 widths[index] = 50 * self.factor
 
         self.ui.table_widget_data.setVisible(False);
         self.ui.table_widget_data.resizeColumnsToContents();
-        for index in xrange(0, 12):
+        for index in xrange(0, 13):
             new_width = self.ui.table_widget_data.columnWidth(index) + (20 * self.factor)
             if new_width < widths[index]:
                 new_width = widths[index]
@@ -416,11 +418,10 @@ class WindowMain(QtGui.QMainWindow):
         if column < 10:
             return
 
-        if self.ui.table_widget_data.item(row, column).text() != "Show":
-            return
-
         log_id = int(self.ui.table_widget_data.item(row, 0).text())
         if (column == 11):
+            if self.ui.table_widget_data.item(row, column).text() != "Show":
+                return
             try:
                 self.telemetry_windows[log_id].raise_()
                 self.telemetry_windows[log_id].activateWindow()
@@ -428,11 +429,19 @@ class WindowMain(QtGui.QMainWindow):
                 self.telemetry_windows[log_id] = QTTelemetryWindow(log_id, self._analyzer)
 
         if (column == 10):
+            if self.ui.table_widget_data.item(row, column).text() != "Show":
+                return
             try:
                 self.log_windows[log_id].raise_()
                 self.log_windows[log_id].activateWindow()
             except:
                 self.log_windows[log_id] = QTLogWindow(log_id, self._analyzer)
+
+        if (column == 12):
+            if self.ui.table_widget_data.item(row, column).text() != "Save":
+                return
+            self.kml_export.save(log_id)
+
         return
 
     def _on_tab_changed(self, index):

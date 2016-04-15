@@ -771,7 +771,7 @@
                <number>4</number>
               </property>
               <property name="columnCount">
-               <number>12</number>
+               <number>13</number>
               </property>
               <attribute name="horizontalHeaderVisible">
                <bool>true</bool>
@@ -801,6 +801,7 @@
               <row/>
               <row/>
               <row/>
+              <column/>
               <column/>
               <column/>
               <column/>
@@ -853,7 +854,7 @@
      <x>0</x>
      <y>0</y>
      <width>1100</width>
-     <height>36</height>
+     <height>27</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
