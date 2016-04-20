@@ -404,7 +404,7 @@ class Analyzer:
                     date = start_date
 
                     for line in lines:
-                        cols = line.split(',')
+                        cols = line.split(';')
                         if len(cols) != 5:
                             continue
             
