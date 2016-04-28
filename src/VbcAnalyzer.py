@@ -278,7 +278,7 @@ class WindowMain(QtGui.QMainWindow):
                 str(d["idlev"]),
                 ("Show" if str(d["havevbarlog"]) == "1" else ""),
                 ("Show" if str(d["haveuilog"]) == "1" else ""),
-                ("Save" if str(d["havegpslog"]) == "1" else ""),
+                ("Save" if (str(d["havegpslog"]) == "1" and str(d["haveuilog"]) == "1")  else ""),
             ]
 
             if row_color_index % 2 == 0:

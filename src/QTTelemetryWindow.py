@@ -248,6 +248,7 @@ class QTTelemetryWindow(QtGui.QMainWindow):
         self._background = None
 
     def _on_figure_motion(self, event):
+        print event
         if event.inaxes == None:
             return
 

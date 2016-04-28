@@ -34,11 +34,11 @@ class KMLExport:
          fp.write('      </description>\n')
          fp.write('      <open>0</open>\n')
          fp.write('      <Folder>\n')
-         fp.write('         <name>Max height</name>\n')
+         fp.write('         <name>Max altitude</name>\n')
          fp.write('         <open>0</open>\n')
          fp.write('         <visibility>1</visibility>\n')
          fp.write('         <Placemark>\n')
-         fp.write('            <name>Height</name>\n')
+         fp.write('            <name>Altitude</name>\n')
          fp.write('            <Style>\n')
          fp.write('               <LineStyle>\n')
          fp.write('                  <color>99ffaa00</color>\n')
@@ -84,8 +84,8 @@ class KMLExport:
             elif i == max_speed_index:
                fp.write('              <name>Max speed: ' + str(row["speed"]) + 'kmh</name>\n')
             elif i == max_height_index:
-               fp.write('              <name>Max height: ' + str(row["height"]) + 'm</name>\n')
-            fp.write('              <description><![CDATA[<TABLE><TR><TD width=160>Sec: ' + str(float(int(row["sec"] * 10)) / 10 ) + '<br><hr><b>Speed: ' + str(row["speed"]) + 'kmh </b><br>Height: ' + str(row["height"]) + 'm<br><hr>Voltage: ' + str(row["voltage"]) + 'V<br>Current: ' + str(row["current"]) + 'A<br>Power: ' + str(row["current"] * row["voltage"]) + 'W<br>Headspeed ' + str(row["headspeed"]) +'rpm<br>PWM: ' + str(row["pwm"]) + '%</TD></TR></TABLE>]]></description>\n')
+               fp.write('              <name>Max altitude: ' + str(row["height"]) + 'm</name>\n')
+            fp.write('              <description><![CDATA[<TABLE><TR><TD width=160>Sec: ' + str(float(int(row["sec"] * 10)) / 10 ) + '<br><hr><b>Speed: ' + str(row["speed"]) + 'kmh </b><br>Altitude: ' + str(row["height"]) + 'm<br><hr>Voltage: ' + str(row["voltage"]) + 'V<br>Current: ' + str(row["current"]) + 'A<br>Power: ' + str(row["current"] * row["voltage"]) + 'W<br>Headspeed ' + str(row["headspeed"]) +'rpm<br>PWM: ' + str(row["pwm"]) + '%</TD></TR></TABLE>]]></description>\n')
             fp.write('              <Style>\n')
             fp.write('                <IconStyle>\n')
             icon_color = 255.0 - (float(row["speed"]))
@@ -123,22 +123,42 @@ class KMLExport:
 
 
    def merge_ui_gps_log(self, uilog, gpslog):
-      data = uilog["data"]
-      for j in xrange(len(uilog["data"])):
-         row = uilog["data"][j]
+      data = []
 
-         if gpslog is not None:
-            timestamp_ui_row = row["sec"] + uilog["start"]
-            nearest_timestamp = None
-            nearest_index = -1
-            for i in xrange(len(gpslog["data"])):
-               row_gps = gpslog["data"][i]
-               timestamp_gps_row = row_gps["sec"] + gpslog["start"]
-               if nearest_index == -1 or abs(timestamp_ui_row - timestamp_gps_row) < nearest_timestamp:
-                  nearest_timestamp = abs(timestamp_ui_row - timestamp_gps_row)
-                  nearest_index = i
-            data[j]["height"] = gpslog["data"][nearest_index]["height"]
-            data[j]["speed"] = gpslog["data"][nearest_index]["speed"]
-            data[j]["longitude"] = gpslog["data"][nearest_index]["longitude"]
-            data[j]["latitude"] = gpslog["data"][nearest_index]["latitude"]
+      index = 0
+      for i in xrange(len(gpslog["data"])):
+         row_gps = gpslog["data"][i]
+         timestamp_gps_row = row_gps["sec"] + gpslog["start"]
+
+         # Check if we have moved
+         if index > 0 and row_gps["height"] == data[index - 1]["height"] and row_gps["longitude"] == data[index - 1]["longitude"] and row_gps["latitude"] == data[index - 1]["latitude"]:
+            continue
+
+         data_row = {}
+         data_row["sec"] = row_gps["sec"]
+         data_row["height"] = row_gps["height"]
+         data_row["speed"] = row_gps["speed"]
+         data_row["longitude"] = row_gps["longitude"]
+         data_row["latitude"] = row_gps["latitude"]
+
+         # Find in UI log
+         nearest_timestamp = None
+         nearest_index = -1            
+         for j in xrange(len(uilog["data"])):
+            row_ui = uilog["data"][j]
+            timestamp_ui_row = row_ui["sec"] + uilog["start"]
+            if nearest_index == -1 or abs(timestamp_gps_row - timestamp_ui_row) < nearest_timestamp:
+               nearest_timestamp = abs(timestamp_gps_row - timestamp_ui_row)
+               nearest_index = j
+
+         row_ui = uilog["data"][nearest_index]
+         data_row["voltage"] = row_ui["voltage"]
+         data_row["current"] = row_ui["current"]
+         data_row["headspeed"] = row_ui["headspeed"]
+         data_row["pwm"] = row_ui["pwm"]
+         data_row["usedcapacity"] = row_ui["usedcapacity"]
+
+         data.append(data_row)
+         index += 1
       return data
+
