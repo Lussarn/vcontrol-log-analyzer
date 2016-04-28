@@ -604,7 +604,7 @@
                      <string notr="true">QCheckBox {color: #e377c2;}</string>
                     </property>
                     <property name="text">
-                     <string>Height</string>
+                     <string>Altitude</string>
                     </property>
                    </widget>
                   </item>
