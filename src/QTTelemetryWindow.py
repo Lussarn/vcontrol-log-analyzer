@@ -138,7 +138,8 @@ class QTTelemetryWindow(QtGui.QMainWindow):
 
         # colors and locators
         fs = 8*self.font_factor
-        self._graphs[-1].xaxis.set_minor_locator(AutoMinorLocator())
+        self.minor_locator = AutoMinorLocator()
+        self._graphs[-1].xaxis.set_minor_locator(self.minor_locator)
         self._graphs[-1].xaxis.label.set_color("#555555")
         self._graphs[-1].tick_params(axis="x", colors="#555555", which="major", direction="in", labelsize=fs, size=4*self.factor, width=1*self.factor)
         self._graphs[-1].tick_params(axis="x", colors="#555555", which="minor", direction="in", labelsize=fs, size=2*self.factor, width=1*self.factor)
@@ -248,7 +249,6 @@ class QTTelemetryWindow(QtGui.QMainWindow):
         self._background = None
 
     def _on_figure_motion(self, event):
-        print event
         if event.inaxes == None:
             return
 
@@ -258,7 +258,7 @@ class QTTelemetryWindow(QtGui.QMainWindow):
 
         x0, y0, x1, y1 = event.inaxes.dataLim.bounds
 
-        number_of_points = len(event.inaxes.lines[0].get_ydata())
+        number_of_points = len(event.inaxes.lines[-1].get_ydata())
         index = int(round((number_of_points-1) * (event.xdata-x0)/x1))
 
         if len(self._data[0]) < index + 1:
@@ -272,10 +272,10 @@ class QTTelemetryWindow(QtGui.QMainWindow):
 
         polygon = None
         if self._select_start == None:
-            linev = self._graphs[0].axvline(x=event.xdata, linewidth=1, color="#000000", alpha=0.5)
+            linev = self._graphs[-1].axvline(x=event.xdata, linewidth=1, color="#000000", alpha=0.5)
             lineh = self._graphs[7].axhline(y=event.ydata, linewidth=1, color="#000000", alpha=0.5)
-            self._graphs[0].draw_artist(linev)
-            self._graphs[0].draw_artist(lineh)
+            self._graphs[-1].draw_artist(linev)
+            self._graphs[-1].draw_artist(lineh)
         else:
             width = abs(event.xdata - self._select_start)
             start = self._select_start
@@ -286,10 +286,10 @@ class QTTelemetryWindow(QtGui.QMainWindow):
             else:
                 col = "#888888"
             polygon = Rectangle((start, 0), width, y1 + 10000, facecolor=col, alpha=0.5)
-            self._graphs[0].add_patch(polygon)
-            self._graphs[0].draw_artist(polygon)
+            self._graphs[-1].add_patch(polygon)
+            self._graphs[-1].draw_artist(polygon)
 
-        self._figure.canvas.blit(self._graphs[0].bbox)
+        self._figure.canvas.blit(self._graphs[-1].bbox)
         if self._select_start == None:
             linev.remove()
             lineh.remove()
@@ -307,7 +307,7 @@ class QTTelemetryWindow(QtGui.QMainWindow):
         if event.button == 3:
             self._update_min_max(0, self.duration)
             self._background =  None
-            self._graphs[0].set_xlim(0, self.duration)
+            self._graphs[-1].set_xlim(0, self.duration)
             self._canvas.draw()
 
         else:
@@ -335,7 +335,7 @@ class QTTelemetryWindow(QtGui.QMainWindow):
 
         width = abs(end - start)
         if width >= 20:
-            self._graphs[0].set_xlim(start, end)
+            self._graphs[-1].set_xlim(start, end)
             self._update_min_max(start, start + width)
 
         self._canvas.draw()
