@@ -242,11 +242,17 @@ class Analyzer:
                 if len(cols) < 8:
                     continue
 
-                date = cols.pop(0)
+                dateCol = cols.pop(0)
                 try:
-                    date = time.strftime('%Y-%m-%d %H:%M:%S', time.strptime(date,'%d.%m.%Y %H:%M:%S'))
+                    date = time.strftime('%Y-%m-%d %H:%M:%S', time.strptime(dateCol,'%d.%m.%Y %H:%M:%S'))
+                    year = int(time.strftime('%Y', time.strptime(dateCol,'%d.%m.%Y %H:%M:%S')))
                 except:
                     continue
+
+                # Time on the VControl is not set correctly
+                if year < 2013:
+                    continue
+
                 capacity = cols.pop(0)
                 used = cols.pop(0)
                 duration = cols.pop(0)
@@ -328,7 +334,11 @@ class Analyzer:
                             error = True
                             break
                         model_name = unicode(cols[1], errors='ignore')
-                        start_date = date = datetime.datetime.strptime(cols[2],'%d.%m.%Y')
+                        try:
+                            start_date = date = datetime.datetime.strptime(cols[2],'%d.%m.%Y')
+                        except:
+                            error = True
+                            break
                         continue
 
                     if ('Logfile End' in line):
@@ -443,7 +453,7 @@ class Analyzer:
     Find and return the vcontrol path, if connected
     """
     def _find_vcontrol_path(self):
-#        return "/home/linus/vc"
+        return "/home/linus/vc/al"
         if vc.globals.OS == "linux":
             import pyudev, codecs
             path = None
