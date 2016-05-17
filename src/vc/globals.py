@@ -7,7 +7,7 @@ import sys
 PROGRAM_NAME = "VBar Control flight analyzer"
 
 # Program version
-VERSION = "v4.2.2"
+VERSION = "v4.2.3"
 
 # Implemented translations
 TRANSLATIONS = ['en']
