@@ -125,7 +125,7 @@ class QTTelemetryWindow(QtGui.QMainWindow):
         # plots
         self._plots = {}
         for i in xrange(0, 8):
-            self._plots[i], = self._graphs[i].plot(self._data[-1], self._data[i], self._colors[i], linewidth=0.5 * self.factor)
+            self._plots[i], = self._graphs[i].plot(self._data[-1], self._data[i], self._colors[i], linewidth=0.75 * self.factor)
 
         # scale graphs
         self._graphs[0].set_ylim(0, max(self._data[0]) * 1.7)
@@ -225,7 +225,7 @@ class QTTelemetryWindow(QtGui.QMainWindow):
         self._graphs[3].set_ylabel("Headspeed (RPM)", fontsize=fs)
         self._graphs[4].set_ylabel("PWM (%)", fontsize=fs)
         self._graphs[5].set_ylabel("Used capacity (mAh)", fontsize=fs)
-        self._graphs[6].set_ylabel("Height (M)", fontsize=fs)
+        self._graphs[6].set_ylabel("Altitude (M)", fontsize=fs)
         self._graphs[7].set_ylabel("Speed (Kmh)", fontsize=fs)
 
 
