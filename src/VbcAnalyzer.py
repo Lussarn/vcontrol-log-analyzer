@@ -389,7 +389,7 @@ class WindowMain(QtGui.QMainWindow):
         self.populate_grid()        
 
     def _on_table_cell_click(self, row, column):
-        isTitle = column < 2 and self.ui.table_widget_data.columnSpan(row, column + 1) == 11
+        isTitle = column < 2 and self.ui.table_widget_data.columnSpan(row, column + 1) == 12
 
         if isTitle:
             if self._model_selected is None:
