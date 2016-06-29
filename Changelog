@@ -85,3 +85,6 @@ Import bug zero dates in vbar log files
 
 v4.2.4
 Fix for flight log
+
+4.2.5
+Fix for Windows home directory in variables

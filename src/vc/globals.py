@@ -7,11 +7,10 @@ import sys
 PROGRAM_NAME = "VBar Control flight analyzer"
 
 # Program version
-VERSION = "v4.2.4"
+VERSION = "v4.2.5"
 
 # Implemented translations
 TRANSLATIONS = ['en']
-
 
 if sys.platform.startswith("linux"):
     OS = "linux"
