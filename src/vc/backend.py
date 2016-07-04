@@ -453,7 +453,7 @@ class Analyzer:
     Find and return the vcontrol path, if connected
     """
     def _find_vcontrol_path(self):
-#        return "/home/linus/vc/al"
+        return "/home/linus/tmp/q"
         if vc.globals.OS == "linux":
             import pyudev, codecs
             path = None
@@ -792,10 +792,15 @@ class Analyzer:
             photo_bitmap = QtGui.QPixmap.fromImage(QtGui.QImage.fromData(str(row["image"])))
 
         data = self.extract(battery_id=None, model_id=model_id, start_date=None, end_date=None, all_flights=False)
+        if len(data['data']) == 0:
+            first = "Never"
+            last = "Never"
+        else:
+            first = data['data'][0]['date'][:10]
+            last = data['data'][-1]['date'][:10]
+
         cycles = data['totals']['cycles']
         duration = data['totals']['duration']
-        first = data['data'][0]['date'][:10]
-        last = data['data'][-1]['date'][:10]
 
         data = {
             'name': name,
