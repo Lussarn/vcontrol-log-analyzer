@@ -88,3 +88,4 @@ Fix for flight log
 
 4.2.5
 Fix for Windows home directory in variables
+Fix for model info if no real flights have been flown
