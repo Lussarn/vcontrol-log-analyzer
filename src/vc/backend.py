@@ -400,7 +400,8 @@ class Analyzer:
                     try:
                         index_col_date = headers.index("Date")
                     except ValueError:
-                        sys.exit(0)
+                        # No date header is a hard error!
+                        continue
 
                     try:
                         index_col_current = headers.index("I(A)")
