@@ -389,32 +389,72 @@ class Analyzer:
                     # try scorpion log file
                     ui_filename = vbar_filename.replace('_vbar.log', '_sco.csv').replace('_vcp.log', '_sco.csv').replace('_vplane.log', '_sco.csv')
 
+                last_hour = ''
                 if os.path.isfile(os.path.join(model_path, ui_filename)):
                     with open(os.path.join(model_path, ui_filename)) as f:
                         lines = f.readlines()
                     lines = [x.strip() for x in lines]
 
-                    # remove first line
-                    lines.pop(0)
+                    # map headers
+                    headers = lines.pop(0).split(';')
+                    try:
+                        index_col_date = headers.index("Date")
+                    except ValueError:
+                        sys.exit(0)
+
+                    try:
+                        index_col_current = headers.index("I(A)")
+                    except ValueError:
+                        index_col_current = None
+
+                    try:
+                        index_col_voltage = headers.index("U(V)")
+                    except ValueError:
+                        index_col_voltage = None
+
+                    try:
+                        index_col_capacity = headers.index("(Q)mAh")
+                    except ValueError:
+                        index_col_capacity = None
+
+                    try:
+                        index_col_headspeed = headers.index("Headspeed(rpm)")
+                    except ValueError:
+                        index_col_headspeed = None
+
+                    try:
+                        index_col_pwm = headers.index("PWM(%)")
+                    except ValueError:
+                        index_col_pwm = None
+
                     date = start_date
 
                     for line in lines:
                         cols = line.split(';')
-                        if len(cols) != 6:
+                        if len(cols) < 6:
                             continue
-        	
-                        hour = cols[0][:2]
+
+                        hour = cols[index_col_date][:2]
+
                         # Rollover on date
                         if (last_hour == '23' and hour == '00'):
                             date = date + datetime.timedelta(days = 1)
-                        sql_date = date.strftime('%Y-%m-%d') + ' ' + cols[0]
+                        last_hour = hour
+                        sql_date = date.strftime('%Y-%m-%d') + ' ' + cols[index_col_date]
+
+                        sql_current = None if index_col_current is None else float(cols[index_col_current])
+                        sql_voltage = None if index_col_voltage is None else float(cols[index_col_voltage])
+                        sql_capacity = None if index_col_capacity is None else float(cols[index_col_capacity])
+                        sql_headspeed = None if index_col_headspeed is None else int(cols[index_col_headspeed])
+                        sql_pwm = None if index_col_pwm is None else int(cols[index_col_pwm])
 
                         cur.execute('INSERT INTO uilog (original_filename, model, date, ampere, voltage, usedcapacity, headspeed, pwm) VALUES (?,?,?,?,?,?,?,?)',
-                            [ui_filename, model_name, sql_date, float(cols[1]), float(cols[2]), float(cols[3]), int(cols[4]), int(cols[5])])
+                            [ui_filename, model_name, sql_date, sql_current, sql_voltage, sql_capacity, sql_headspeed, sql_pwm])
                     self._db().commit()
 
                 # See if we have an gps file for this flight
                 gps_filename = vbar_filename.replace('_vbar.log', '_gps.csv').replace('_vcp.log', '_gps.csv').replace('_vplane.log', '_gps.csv')
+                last_hour = '';
                 if os.path.isfile(os.path.join(model_path, gps_filename)):
                     with open(os.path.join(model_path, gps_filename)) as f:
                         lines = f.readlines()
@@ -433,6 +473,7 @@ class Analyzer:
                         # Rollover on date
                         if (last_hour == '23' and hour == '00'):
                             date = date + datetime.timedelta(days = 1)
+                        last_hour = hour
                         sql_date = date.strftime('%Y-%m-%d') + ' ' + cols[0]
                         cur.execute('INSERT INTO gpslog (original_filename, model, date, longitude, latitude, height, speed) VALUES (?,?,?,?,?,?,?)',
                             [gps_filename, model_name, sql_date, float(cols[1]), float(cols[2]), int(cols[3]), int(cols[4])])
